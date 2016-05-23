@@ -128,7 +128,7 @@ public class AquaDockerScannerBuilder extends Builder {
          * This human readable name is used in the configuration screen.
          */
         public String getDisplayName() {
-            return "Aqua Docker Scanner";
+            return "Aqua Security";
         }
 
         @Override

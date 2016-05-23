@@ -28,7 +28,7 @@
     -->
   </properties>
 
-  <name>Aqua Docker Scanner Plugin</name>
+  <name>Aqua Security</name>
   <description>Scans Docker images for vulnerabilities</description>
   <url>https://wiki.jenkins-ci.org/display/JENKINS/TODO+Plugin</url>
 

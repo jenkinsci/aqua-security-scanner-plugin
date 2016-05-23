@@ -3,7 +3,7 @@
   <!--
     This Jelly script is used to produce the global configuration option.
   -->
-  <f:section title="Aqua Docker Scanner Builder">
+  <f:section title="Aqua Security">
     <f:entry title="Aqua API url" field="apiURL">
       <f:textbox />
     </f:entry>
