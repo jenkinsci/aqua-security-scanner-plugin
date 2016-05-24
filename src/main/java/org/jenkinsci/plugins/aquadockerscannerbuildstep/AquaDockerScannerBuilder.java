@@ -26,6 +26,8 @@ import java.io.IOException;
  */
 public class AquaDockerScannerBuilder extends Builder {
 
+    private static final int OK_CODE = 0;
+    private static final int DISALLOWED_CODE = 4;
     private final String registry;
     private final String image;
 
@@ -61,13 +63,18 @@ public class AquaDockerScannerBuilder extends Builder {
 	    apiURL = "https://" + apiURL;
 	}
 	
-	boolean success = ScannerExecuter.execute(build, launcher, listener,
-						  apiURL, user, password, timeout,
-						  registry, image);
-	if (!success) {
+	int exitCode = ScannerExecuter.execute(build, launcher, listener,
+					       apiURL, user, password, timeout,
+					       registry, image);
+	switch (exitCode) {
+	case OK_CODE:
+	    return true;
+	case DISALLOWED_CODE:
+	    return false;
+	default:
+	    // This exception causes the message to appear in the Jenkins console
 	    throw new AbortException("Scanning failed.");
 	}
-	return true;
     }
 
     // Overridden for better type safety.
