@@ -16,17 +16,17 @@ import java.io.PrintStream;
  */
 public class ScannerExecuter {
     
-    static final String SCANNER_DOCKER_IMAGE = "scalock/scanner-cli";
+    private static final String SCANNER_DOCKER_IMAGE = "scalock/scanner-cli";
 
-    public static boolean execute(AbstractBuild build,
-				  Launcher launcher,
-				  BuildListener listener,
-				  String apiURL,
-				  String user,
-				  String password,
-				  int timeout,
-				  String registry,
-				  String image) {
+    public static int execute(AbstractBuild build,
+			      Launcher launcher,
+			      BuildListener listener,
+			      String apiURL,
+			      String user,
+			      String password,
+			      int timeout,
+			      String registry,
+			      String image) {
 	
 	Process p;
 	try {
@@ -52,7 +52,7 @@ public class ScannerExecuter {
 	    boolean[] masks = new boolean[ps.cmds().size()];
 	    masks[6] = true;  // Mask out password
 	    ps.masks(masks);
-	    int rc = ps.join();  // RUN !
+	    int exitCode = ps.join();  // RUN !
 
 	    // Copy local file to workspace FilePath object (which might be on remote machine)
 	    FilePath workspace = build.getWorkspace();
@@ -60,14 +60,14 @@ public class ScannerExecuter {
 	    FilePath outFilePath = new FilePath(outFile);
 	    outFilePath.copyTo(target);   
 
-	    return rc==0;
+	    return exitCode;
 
 	} catch (RuntimeException e) {
 	    listener.getLogger().println("RuntimeException:" + e.toString());
-	    return false;
+	    return -1;
 	} catch (Exception e) {
 	    listener.getLogger().println("Exception:" + e.toString());
-	    return false;
+	    return -1;
 	}
     }
 }
