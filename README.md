@@ -42,4 +42,7 @@ sudo usermod -aG docker jenkins
 ## Installing manually ##
 Copy the *target/aqua-docker-scanner.hpi* file to *$JENKINS/plugins/* where *JENKINS* is the Jenkins root directory, by default it is */var/lib/jenkins/*.
 
-Restart Jenkins.
+Restart Jenkins:
+```
+     sudo /etc/init.d/jenkins restart
+```
