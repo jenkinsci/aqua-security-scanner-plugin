@@ -28,24 +28,39 @@ public class AquaDockerScannerBuilder extends Builder {
 
     private static final int OK_CODE = 0;
     private static final int DISALLOWED_CODE = 4;
+    private final String locationType;
     private final String registry;
-    private final String image;
+    private final String localImage;
+    private final String hostedImage;
 
     // Fields in config.jelly must match the parameter names in the "DataBoundConstructor"
     @DataBoundConstructor
-    public AquaDockerScannerBuilder(String registry, String image) {
+    public AquaDockerScannerBuilder(String locationType, String registry, String localImage, String hostedImage) {
+	this.locationType = locationType;
         this.registry = registry;
-        this.image = image;
+        this.localImage = localImage;
+        this.hostedImage = hostedImage;
     }
 
     /**
      * Public access required by config.jelly to display current values in configuration screen.
      */
+    public String getLocationType() {
+        return locationType;
+    }
     public String getRegistry() {
         return registry;
     }
-    public String getImage() {
-        return image;
+    public String getLocalImage() {
+        return localImage;
+    }
+    public String getHostedImage() {
+        return hostedImage;
+    }
+
+    // Returns the 'checked' state of the radio button got the GUI in the config screen
+    public String isLocationType(String type) {
+        return this.locationType.equals(type) ? "true" : "false";
     }
 
     @Override
@@ -65,7 +80,7 @@ public class AquaDockerScannerBuilder extends Builder {
 	
 	int exitCode = ScannerExecuter.execute(build, launcher, listener,
 					       apiURL, user, password, timeout,
-					       registry, image);
+					       registry, localImage);
 	switch (exitCode) {
 	case OK_CODE:
 	    return true;
