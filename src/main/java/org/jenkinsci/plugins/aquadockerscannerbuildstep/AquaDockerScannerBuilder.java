@@ -80,7 +80,7 @@ public class AquaDockerScannerBuilder extends Builder {
 	
 	int exitCode = ScannerExecuter.execute(build, launcher, listener,
 					       apiURL, user, password, timeout,
-					       registry, localImage);
+					       locationType, localImage, registry, hostedImage);
 	switch (exitCode) {
 	case OK_CODE:
 	    return true;
