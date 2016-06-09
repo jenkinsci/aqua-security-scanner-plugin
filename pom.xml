@@ -10,7 +10,7 @@
     <relativePath/>
   </parent>
   <groupId>org.jenkins-ci.plugins</groupId>
-  <artifactId>aqua-docker-scanner</artifactId>
+  <artifactId>aqua-security-scanner</artifactId>
   <version>1.0</version>
   <packaging>hpi</packaging>
 
@@ -32,8 +32,6 @@
   <description>Scans Docker images for vulnerabilities</description>
   <url>https://wiki.jenkins-ci.org/display/JENKINS/TODO+Plugin</url>
 
-  <!-- The default licence for Jenkins OSS Plugins is MIT. Substitute for the applicable one if needed. -->
-
   <licenses>
     <license>
       <name>Apache License, Version 2.0</name>
@@ -43,22 +41,19 @@
     </license>
   </licenses>
 
-  <!-- If you want this to appear on the wiki page:
   <developers>
     <developer>
-      <id>bhacker</id>
-      <name>Bob Q. Hacker</name>
-      <email>bhacker@nowhere.net</email>
+      <id>norbyltd</id>
+      <email>norbyltd@gmail.com</email>
     </developer>
   </developers>
-  -->
-  <!-- Assuming you want to host on @jenkinsci:
+
   <scm>
     <connection>scm:git:git://github.com/jenkinsci/${project.artifactId}-plugin.git</connection>
     <developerConnection>scm:git:git@github.com:jenkinsci/${project.artifactId}-plugin.git</developerConnection>
     <url>http://github.com/jenkinsci/${project.artifactId}-plugin</url>
   </scm>
-   -->
+
   <repositories>
     <repository>
       <id>repo.jenkins-ci.org</id>
@@ -71,14 +66,5 @@
       <url>http://repo.jenkins-ci.org/public/</url>
     </pluginRepository>
   </pluginRepositories>
-  <!-- If you want to depend on other plugins:
-  <dependencies>
-    <dependency>
-      <groupId>org.jenkins-ci.plugins</groupId>
-      <artifactId>credentials</artifactId>
-      <version>1.9.4</version>
-    </dependency>
-  </dependencies>
-  -->
 
 </project>
