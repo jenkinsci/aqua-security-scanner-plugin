@@ -65,7 +65,7 @@ public class ScannerExecuter {
 
 	    // Copy local file to workspace FilePath object (which might be on remote machine)
 	    FilePath workspace = build.getWorkspace();
-	    FilePath target = new FilePath(workspace, "scanout.txt");
+	    FilePath target = new FilePath(workspace, "scanout.json");
 	    FilePath outFilePath = new FilePath(outFile);
 	    outFilePath.copyTo(target);   
 
