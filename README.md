@@ -24,12 +24,21 @@ sudo usermod -aG docker jenkins
 ```
 
 * Installing Maven3 (must be 3)
+..*   On Ubuntu 14.04
 ```
       sudo add-apt-repository ppa:natecarlson/maven3
       sudo apt-get update
       sudo apt-get install maven3
       sudo ln -s /usr/bin/mvn3 /usr/bin/mvn
 ```
+..*   On Ubuntu 15.10
+```
+      sudo apt-get update
+      sudo apt-get install maven
+```
+
+2. Another item
+⋅⋅* Unordered sub-list. 
 
 *  Build
 
