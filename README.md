@@ -1,4 +1,4 @@
-# Aqua Docker Scanner Jenkins Plugin #
+# Aqua Security Scanner Jenkins Plugin #
 
 This is a Jenkins plugin for calling the Aqua API to scan a Docker image
 
