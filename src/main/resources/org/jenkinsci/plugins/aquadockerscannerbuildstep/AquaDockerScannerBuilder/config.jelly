@@ -6,10 +6,20 @@
     See global.jelly for a general discussion about jelly script.
   -->
 
-  <f:entry title="Registry" field="registry">
-    <f:textbox />
-  </f:entry>
-  <f:entry title="Image" field="image">
-    <f:textbox />
-  </f:entry>
+   <f:radioBlock checked="${instance.isLocationType('local')}" name="locationType" value="local" title="Local image" inline="true">
+      <f:entry title="Image name" field="localImage">
+	<f:textbox />
+      </f:entry>
+   </f:radioBlock>
+   <f:radioBlock checked="${instance.isLocationType('hosted')}" name="locationType" value="hosted" title="Hosted image" inline="true">
+      <f:entry title="Registry" field="registry">
+	<f:textbox />
+      </f:entry>
+      <f:entry title="Image name" field="hostedImage">
+	<f:textbox />
+      </f:entry>
+   </f:radioBlock>
+
+
+
 </j:jelly>

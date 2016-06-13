@@ -16,7 +16,7 @@ import java.io.PrintStream;
  */
 public class ScannerExecuter {
     
-    private static final String SCANNER_DOCKER_IMAGE = "scalock/scanner-cli";
+    private static final String SCANNER_DOCKER_IMAGE = "scalock/scanner-cli:stable";
 
     public static int execute(AbstractBuild build,
 			      Launcher launcher,
@@ -25,23 +25,32 @@ public class ScannerExecuter {
 			      String user,
 			      String password,
 			      int timeout,
+			      String locationType,
+			      String localImage,
 			      String registry,
-			      String image) {
+			      String hostedImage) {
 	
 	Process p;
 	try {
-	    String apiUrlEnvVar = "HOST=" + apiURL;
-	    String userEnvVar = "USER=" + user;
-	    String passwordEnvVar = "PASSWORD=" + password;
-	    String timeoutEnvVar;
-	    timeoutEnvVar = "SCAN_TIMEOUT=" + timeout;
-
+	    int passwordIndex = -1;
 	    ArgumentListBuilder args = new ArgumentListBuilder();
-	    args.add("docker", "run",  "--rm", "-e", userEnvVar, "-e", passwordEnvVar, "-e", apiUrlEnvVar);
-	    if (timeout > 0) {  // 0 means use default
-		args.add("-e", timeoutEnvVar);
-	    }
-	    args.add(SCANNER_DOCKER_IMAGE, registry, image);
+	    switch (locationType) {
+	    case "hosted":
+		args.add("docker", "run",  "--rm", SCANNER_DOCKER_IMAGE,
+			 "--user", user, "--password", password, "--host", apiURL,
+			 "--registry", registry, "--image", hostedImage);
+		if (timeout > 0) {  // 0 means use default
+		    args.add("--timeout", String.valueOf(timeout));
+		}
+		passwordIndex = 7;
+		break;
+	    case "local":
+		args.add("docker", "run",  "--rm", "-v", "/var/run/docker.sock:/var/run/docker.sock", SCANNER_DOCKER_IMAGE,
+			 "--user", user, "--password", password, "--host", apiURL,
+			 "--local", "--image", localImage);
+		passwordIndex = 9;
+		break;
+	    }		    
 
 	    File outFile = new File(build.getRootDir(), "out");
 	    Launcher.ProcStarter ps = launcher.launch();
@@ -50,7 +59,7 @@ public class ScannerExecuter {
 	    ps.stderr(listener.getLogger());
 	    ps.stdout(new PrintStream(outFile, "UTF-8")); 
 	    boolean[] masks = new boolean[ps.cmds().size()];
-	    masks[6] = true;  // Mask out password
+	    masks[passwordIndex] = true;  // Mask out password
 	    ps.masks(masks);
 	    int exitCode = ps.join();  // RUN !
 
