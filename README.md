@@ -6,13 +6,17 @@ This is a Jenkins plugin for calling the Aqua API to scan a Docker image
 
 1. Docker must be installed on the same machine Jenkins is installed in because the scanner itself is deployed via a Docker container.
 2. The *jenkins* user must be added to the *docker* group so it has permission to run Docker:
-```
- sudo usermod -aG docker jenkins
-```
+ 
+     ```
+     sudo usermod -aG docker jenkins
+     ```
+     
 3. Ensure Aqua's scanner-cli image exists on this machine
-```
- sudo docker pull scalock/scanner-cli:stable
-```
+ 
+     ```
+     sudo docker pull scalock/scanner-cli:stable
+     ```
+     
 
 ## Usage of plugin in Jenkins ##
 * In the global configuration page ("Manage Jenkins"/"Configure System") in the section for this plugin, enter values for the Aqua API url, the user name, the password and a timeout value in seconds. The build step will fail if scanning does not terminate within the timeout value. A value of 0 will cause the default timeout value, 300, to be used.
