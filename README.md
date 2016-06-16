@@ -20,7 +20,7 @@ This is a Jenkins plugin for calling the Aqua API to scan a Docker image
 
 ## Usage of plugin in Jenkins ##
 * In the global configuration page ("Manage Jenkins"/"Configure System") in the section for this plugin, enter values for the Aqua API url, the user name, the password and a timeout value in seconds. The build step will fail if scanning does not terminate within the timeout value. A value of 0 will cause the default timeout value, 300, to be used.
-* In the configuration page for your project, add an "Aqua Security" step from the "Add build step" dropdown list. Choose between a local image or a hosted image. Enter the image path (including the tag) of the image that is to be scanned, and in the case of a hosted image, also enter the registry name.
+* In the configuration page for your project, add an "Aqua Security" step from the "Add build step" dropdown list. Choose between a local image or a hosted image. Enter the image path (including the tag) of the image that is to be scanned, and in the case of a hosted image, also enter the registry name. These values can be entered with $VARIABLE syntax on environment variables.
 * When run successfully, an artifact named "scanout.json" will be created in the project's workspace. You would probably want to use the "Archive the artifacts" post-build action to archive this file in a build for later viewing.
 
 ## Building the plugin ##
