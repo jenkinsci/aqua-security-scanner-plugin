@@ -1,6 +1,7 @@
 package org.jenkinsci.plugins.aquadockerscannerbuildstep;
 
 import hudson.Launcher;
+import hudson.EnvVars;
 import hudson.Launcher.ProcStarter;
 import hudson.FilePath;
 import hudson.model.AbstractBuild;
@@ -32,6 +33,13 @@ public class ScannerExecuter {
 	
 	Process p;
 	try {
+	    // Form input might be in $VARIABLE or ${VARIABLE} form, expand.
+	    // expand() is a noop for strings not in the above form.
+	    final EnvVars env = build.getEnvironment(listener);
+	    localImage = env.expand(localImage);
+	    registry = env.expand(registry);
+	    hostedImage = env.expand(hostedImage);
+
 	    int passwordIndex = -1;
 	    ArgumentListBuilder args = new ArgumentListBuilder();
 	    switch (locationType) {
