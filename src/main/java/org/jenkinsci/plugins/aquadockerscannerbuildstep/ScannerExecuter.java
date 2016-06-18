@@ -31,7 +31,7 @@ public class ScannerExecuter {
 			      String registry,
 			      String hostedImage) {
 	
-	Process p;
+	PrintStream print_stream = null;
 	try {
 	    // Form input might be in $VARIABLE or ${VARIABLE} form, expand.
 	    // expand() is a noop for strings not in the above form.
@@ -65,7 +65,8 @@ public class ScannerExecuter {
 	    ps.cmds(args);
 	    ps.stdin(null);
 	    ps.stderr(listener.getLogger());
-	    ps.stdout(new PrintStream(outFile, "UTF-8")); 
+	    print_stream = new PrintStream(outFile, "UTF-8");
+	    ps.stdout(print_stream); 
 	    boolean[] masks = new boolean[ps.cmds().size()];
 	    masks[passwordIndex] = true;  // Mask out password
 	    ps.masks(masks);
@@ -78,13 +79,16 @@ public class ScannerExecuter {
 	    outFilePath.copyTo(target);   
 
 	    return exitCode;
-
 	} catch (RuntimeException e) {
 	    listener.getLogger().println("RuntimeException:" + e.toString());
 	    return -1;
 	} catch (Exception e) {
 	    listener.getLogger().println("Exception:" + e.toString());
 	    return -1;
+	} finally {
+	    if (print_stream != null) {
+		print_stream.close();
+	    }
 	}
     }
 }
