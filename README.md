@@ -64,7 +64,7 @@ Restart Jenkins:
 ## Publicly releasing a new version to jenkins-ci.org ##
 See https://wiki.jenkins-ci.org/display/JENKINS/Hosting+Plugins#HostingPlugins-Releasingtojenkinsci.org. It describes several alternatives, use the following:
 
-1. Create a settings.xml file with your credentials as described
+1. Create a *settings.xml* file with your credentials as described
 2. Execute:
 ```
     mvn release:prepare release:perform
