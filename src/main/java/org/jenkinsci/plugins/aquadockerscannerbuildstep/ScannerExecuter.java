@@ -58,6 +58,8 @@ public class ScannerExecuter {
 			 "--local", "--image", localImage);
 		passwordIndex = 9;
 		break;
+	    default:
+		return -1;
 	    }		    
 
 	    File outFile = new File(build.getRootDir(), "out");
