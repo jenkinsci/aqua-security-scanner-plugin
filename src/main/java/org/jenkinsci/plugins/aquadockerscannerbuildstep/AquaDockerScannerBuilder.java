@@ -68,6 +68,7 @@ public class AquaDockerScannerBuilder extends Builder {
 	throws AbortException {
 	// This is where you 'build' the project.
 
+	String aquaScannerImage = getDescriptor().getAquaScannerImage();
 	String apiURL = getDescriptor().getApiURL();
 	String user = getDescriptor().getUser();
 	String password = getDescriptor().getPassword();
@@ -79,7 +80,7 @@ public class AquaDockerScannerBuilder extends Builder {
 	}
 	
 	int exitCode = ScannerExecuter.execute(build, launcher, listener,
-					       apiURL, user, password, timeout,
+					       aquaScannerImage, apiURL, user, password, timeout,
 					       locationType, localImage, registry, hostedImage);
 	switch (exitCode) {
 	case OK_CODE:
@@ -110,6 +111,7 @@ public class AquaDockerScannerBuilder extends Builder {
          * To persist global configuration information,
          * simply store it in a field and call save().
          */
+        private String aquaScannerImage = "aquasec/scanner-cli:latest"; // With default value
         private String apiURL;
         private String user;
         private String password;
@@ -157,6 +159,7 @@ public class AquaDockerScannerBuilder extends Builder {
         public boolean configure(StaplerRequest req, JSONObject formData) throws FormException {
             // To persist global configuration information,
             // set that to properties and call save().
+            aquaScannerImage = formData.getString("aquaScannerImage");
             apiURL = formData.getString("apiURL");
             user = formData.getString("user");
             password = formData.getString("password");
@@ -169,6 +172,9 @@ public class AquaDockerScannerBuilder extends Builder {
 	    return super.configure(req, formData);
         }
 
+        public String getAquaScannerImage() {
+            return aquaScannerImage;
+        }
         public String getApiURL() {
             return apiURL;
         }

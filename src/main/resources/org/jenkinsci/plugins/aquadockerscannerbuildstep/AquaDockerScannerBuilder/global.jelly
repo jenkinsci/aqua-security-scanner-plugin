@@ -4,6 +4,9 @@
     This Jelly script is used to produce the global configuration option.
   -->
   <f:section title="Aqua Security">
+    <f:entry title="Aqua scanner image" field="aquaScannerImage">
+      <f:textbox />
+    </f:entry>
     <f:entry title="Aqua API URL" field="apiURL">
       <f:textbox />
     </f:entry>

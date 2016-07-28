@@ -17,11 +17,10 @@ import java.io.PrintStream;
  */
 public class ScannerExecuter {
     
-    private static final String SCANNER_DOCKER_IMAGE = "scalock/scanner-cli:stable";
-
     public static int execute(AbstractBuild build,
 			      Launcher launcher,
 			      BuildListener listener,
+			      String aquaScannerImage,
 			      String apiURL,
 			      String user,
 			      String password,
@@ -44,18 +43,18 @@ public class ScannerExecuter {
 	    ArgumentListBuilder args = new ArgumentListBuilder();
 	    switch (locationType) {
 	    case "hosted":
-		args.add("docker", "run",  "--rm", SCANNER_DOCKER_IMAGE,
+		args.add("docker", "run",  "--rm", aquaScannerImage,
 			 "--user", user, "--password", password, "--host", apiURL,
-			 "--registry", registry, "--image", hostedImage);
+			 "--registry", registry, "--image", hostedImage, "--html");
 		if (timeout > 0) {  // 0 means use default
 		    args.add("--timeout", String.valueOf(timeout));
 		}
 		passwordIndex = 7;
 		break;
 	    case "local":
-		args.add("docker", "run",  "--rm", "-v", "/var/run/docker.sock:/var/run/docker.sock", SCANNER_DOCKER_IMAGE,
+		args.add("docker", "run",  "--rm", "-v", "/var/run/docker.sock:/var/run/docker.sock", aquaScannerImage,
 			 "--user", user, "--password", password, "--host", apiURL,
-			 "--local", "--image", localImage);
+			 "--local", "--image", localImage, "--html");
 		passwordIndex = 9;
 		break;
 	    default:
@@ -76,7 +75,7 @@ public class ScannerExecuter {
 
 	    // Copy local file to workspace FilePath object (which might be on remote machine)
 	    FilePath workspace = build.getWorkspace();
-	    FilePath target = new FilePath(workspace, "scanout.json");
+	    FilePath target = new FilePath(workspace, "scanout.html");
 	    FilePath outFilePath = new FilePath(outFile);
 	    outFilePath.copyTo(target);   
 
