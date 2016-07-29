@@ -14,7 +14,7 @@ This is a Jenkins plugin for calling the Aqua API to scan a Docker image
 3. Ensure Aqua's scanner-cli image exists on this machine, you will need permission for the following because the image is not public.
  
      ```
-     sudo docker pull <full name of Aqua's scanne image>
+     sudo docker pull <full name of Aqua's scanner image>
      ```
      
 
