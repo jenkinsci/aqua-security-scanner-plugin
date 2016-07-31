@@ -111,7 +111,7 @@ public class AquaDockerScannerBuilder extends Builder {
          * To persist global configuration information,
          * simply store it in a field and call save().
          */
-        private String aquaScannerImage = "aquasec/scanner-cli:latest"; // With default value
+        private String aquaScannerImage = "aquasec/scanner-cli:1.2"; // With default value
         private String apiURL;
         private String user;
         private String password;
