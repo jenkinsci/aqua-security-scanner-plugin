@@ -28,8 +28,9 @@ public class ScannerExecuter {
 			      String locationType,
 			      String localImage,
 			      String registry,
-			      String hostedImage) {
-	
+			      String hostedImage,
+			      boolean checkonly) {
+
 	PrintStream print_stream = null;
 	try {
 	    // Form input might be in $VARIABLE or ${VARIABLE} form, expand.
@@ -59,7 +60,11 @@ public class ScannerExecuter {
 		break;
 	    default:
 		return -1;
-	    }		    
+	    }
+
+	    if (checkonly) {
+		args.add("--checkonly");
+	    }
 
 	    File outFile = new File(build.getRootDir(), "out");
 	    Launcher.ProcStarter ps = launcher.launch();

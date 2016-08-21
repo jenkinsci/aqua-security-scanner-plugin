@@ -33,14 +33,16 @@ public class AquaDockerScannerBuilder extends Builder {
     private final String registry;
     private final String localImage;
     private final String hostedImage;
+    private final String onDisallowed;
 
     // Fields in config.jelly must match the parameter names in the "DataBoundConstructor"
     @DataBoundConstructor
-    public AquaDockerScannerBuilder(String locationType, String registry, String localImage, String hostedImage) {
+    public AquaDockerScannerBuilder(String locationType, String registry, String localImage, String hostedImage, String onDisallowed) {
 	this.locationType = locationType;
         this.registry = registry;
         this.localImage = localImage;
         this.hostedImage = hostedImage;
+        this.onDisallowed = onDisallowed;
     }
 
     /**
@@ -57,6 +59,9 @@ public class AquaDockerScannerBuilder extends Builder {
     }
     public String getHostedImage() {
         return hostedImage;
+    }
+    public String getOnDisallowed() {
+        return onDisallowed;
     }
 
     // Returns the 'checked' state of the radio button got the GUI in the config screen
@@ -82,7 +87,8 @@ public class AquaDockerScannerBuilder extends Builder {
 	
 	int exitCode = ScannerExecuter.execute(build, launcher, listener,
 					       aquaScannerImage, apiURL, user, password, timeout,
-					       locationType, localImage, registry, hostedImage);
+					       locationType, localImage, registry, hostedImage,
+					       ! onDisallowed.equals("fail"));
 	build.addAction(new AquaScannerAction(build));
 
 	archiveArtifacts(build, launcher, listener);
@@ -123,7 +129,7 @@ public class AquaDockerScannerBuilder extends Builder {
          * To persist global configuration information,
          * simply store it in a field and call save().
          */
-        private String aquaScannerImage = "aquasec/scanner-cli:1.2"; // With default value
+        private String aquaScannerImage = "aquasec/scanner-cli:1.2"; // Default value
         private String apiURL;
         private String user;
         private String password;
