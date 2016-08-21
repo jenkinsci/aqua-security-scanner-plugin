@@ -108,8 +108,9 @@ public class AquaDockerScannerBuilder extends Builder {
     private void archiveArtifacts(AbstractBuild build, Launcher launcher, BuildListener listener) 
 	throws java.lang.InterruptedException {
 	ArtifactArchiver artifactArchiver = new ArtifactArchiver("*");
-	assert build != null; // Make Findbugs happy
-	artifactArchiver.perform(build, build.getWorkspace(), launcher, listener);
+	if (build != null) { // Make Findbugs happy, really always true
+	    artifactArchiver.perform(build, build.getWorkspace(), launcher, listener);
+	}
     }
 
     // Overridden for better type safety.
