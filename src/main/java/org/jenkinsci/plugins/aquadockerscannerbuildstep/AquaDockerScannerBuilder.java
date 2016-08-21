@@ -8,6 +8,7 @@ import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.tasks.Builder;
 import hudson.model.BuildListener;
+import hudson.tasks.ArtifactArchiver;
 import hudson.tasks.BuildStepDescriptor;
 import net.sf.json.JSONObject;
 import org.kohsuke.stapler.DataBoundConstructor;
@@ -32,14 +33,16 @@ public class AquaDockerScannerBuilder extends Builder {
     private final String registry;
     private final String localImage;
     private final String hostedImage;
+    private final String onDisallowed;
 
     // Fields in config.jelly must match the parameter names in the "DataBoundConstructor"
     @DataBoundConstructor
-    public AquaDockerScannerBuilder(String locationType, String registry, String localImage, String hostedImage) {
+    public AquaDockerScannerBuilder(String locationType, String registry, String localImage, String hostedImage, String onDisallowed) {
 	this.locationType = locationType;
         this.registry = registry;
         this.localImage = localImage;
         this.hostedImage = hostedImage;
+        this.onDisallowed = onDisallowed;
     }
 
     /**
@@ -57,6 +60,9 @@ public class AquaDockerScannerBuilder extends Builder {
     public String getHostedImage() {
         return hostedImage;
     }
+    public String getOnDisallowed() {
+        return onDisallowed;
+    }
 
     // Returns the 'checked' state of the radio button got the GUI in the config screen
     public String isLocationType(String type) {
@@ -65,7 +71,7 @@ public class AquaDockerScannerBuilder extends Builder {
 
     @Override
     public boolean perform(AbstractBuild build, Launcher launcher, BuildListener listener)
-	throws AbortException {
+	throws AbortException, java.lang.InterruptedException {
 	// This is where you 'build' the project.
 
 	String aquaScannerImage = getDescriptor().getAquaScannerImage();
@@ -81,7 +87,12 @@ public class AquaDockerScannerBuilder extends Builder {
 	
 	int exitCode = ScannerExecuter.execute(build, launcher, listener,
 					       aquaScannerImage, apiURL, user, password, timeout,
-					       locationType, localImage, registry, hostedImage);
+					       locationType, localImage, registry, hostedImage,
+					       ! onDisallowed.equals("fail"));
+	build.addAction(new AquaScannerAction(build));
+
+	archiveArtifacts(build, launcher, listener);
+
 	switch (exitCode) {
 	case OK_CODE:
 	    return true;
@@ -91,6 +102,13 @@ public class AquaDockerScannerBuilder extends Builder {
 	    // This exception causes the message to appear in the Jenkins console
 	    throw new AbortException("Scanning failed.");
 	}
+    }
+
+    // Archive all artifacts
+    private void archiveArtifacts(AbstractBuild build, Launcher launcher, BuildListener listener) 
+	throws java.lang.InterruptedException {
+	ArtifactArchiver artifactArchiver = new ArtifactArchiver("*");
+	artifactArchiver.perform(build, build.getWorkspace(), launcher, listener);
     }
 
     // Overridden for better type safety.
@@ -111,7 +129,7 @@ public class AquaDockerScannerBuilder extends Builder {
          * To persist global configuration information,
          * simply store it in a field and call save().
          */
-        private String aquaScannerImage = "aquasec/scanner-cli:1.2"; // With default value
+        private String aquaScannerImage = "aquasec/scanner-cli:1.2"; // Default value
         private String apiURL;
         private String user;
         private String password;
