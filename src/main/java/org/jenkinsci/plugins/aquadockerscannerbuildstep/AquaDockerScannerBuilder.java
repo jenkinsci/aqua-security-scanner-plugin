@@ -1,5 +1,6 @@
 package org.jenkinsci.plugins.aquadockerscannerbuildstep;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import hudson.AbortException;
 import hudson.Launcher;
 import hudson.Extension;
