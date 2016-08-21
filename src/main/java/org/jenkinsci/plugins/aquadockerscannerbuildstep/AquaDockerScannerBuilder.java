@@ -105,12 +105,11 @@ public class AquaDockerScannerBuilder extends Builder {
     }
 
     // Archive all artifacts
+    @SuppressFBWarnings("NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE") // No idea why this is needed
     private void archiveArtifacts(AbstractBuild build, Launcher launcher, BuildListener listener) 
 	throws java.lang.InterruptedException {
 	ArtifactArchiver artifactArchiver = new ArtifactArchiver("*");
-	if (artifactArchiver != null) { // Make Findbugs happy, really always true
-	    artifactArchiver.perform(build, build.getWorkspace(), launcher, listener);
-	}
+	artifactArchiver.perform(build, build.getWorkspace(), launcher, listener);
     }
 
     // Overridden for better type safety.
