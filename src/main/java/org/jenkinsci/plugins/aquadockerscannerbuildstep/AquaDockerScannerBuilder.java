@@ -89,7 +89,7 @@ public class AquaDockerScannerBuilder extends Builder {
 	int exitCode = ScannerExecuter.execute(build, launcher, listener,
 					       aquaScannerImage, apiURL, user, password, timeout,
 					       locationType, localImage, registry, hostedImage,
-					       ! onDisallowed.equals("fail"));
+					       onDisallowed == null || ! onDisallowed.equals("fail"));
 	build.addAction(new AquaScannerAction(build));
 
 	archiveArtifacts(build, launcher, listener);
