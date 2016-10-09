@@ -28,22 +28,24 @@ import java.io.IOException;
  */
 public class AquaDockerScannerBuilder extends Builder {
 
-    private static final int OK_CODE = 0;
-    private static final int DISALLOWED_CODE = 4;
+    public static final int OK_CODE = 0;
+    public static final int DISALLOWED_CODE = 4;
     private final String locationType;
     private final String registry;
     private final String localImage;
     private final String hostedImage;
     private final String onDisallowed;
+    private final String notCompliesCmd;
 
     // Fields in config.jelly must match the parameter names in the "DataBoundConstructor"
     @DataBoundConstructor
-    public AquaDockerScannerBuilder(String locationType, String registry, String localImage, String hostedImage, String onDisallowed) {
+    public AquaDockerScannerBuilder(String locationType, String registry, String localImage, String hostedImage, String onDisallowed, String notCompliesCmd) {
 	this.locationType = locationType;
         this.registry = registry;
         this.localImage = localImage;
         this.hostedImage = hostedImage;
         this.onDisallowed = onDisallowed;
+        this.notCompliesCmd = notCompliesCmd;
     }
 
     /**
@@ -64,10 +66,18 @@ public class AquaDockerScannerBuilder extends Builder {
     public String getOnDisallowed() {
         return onDisallowed;
     }
+    public String getNotCompliesCmd() {
+        return notCompliesCmd;
+    }
 
-    // Returns the 'checked' state of the radio button got the GUI in the config screen
+    // Returns the 'checked' state of the radio button for the step GUI
     public String isLocationType(String type) {
         return this.locationType.equals(type) ? "true" : "false";
+    }
+
+    // Returns the 'checked' state of the radio button for the step GUI
+    public String isOnDisallowed(String state) {
+        return this.onDisallowed.equals(state) ? "true" : "false";
     }
 
     @Override
@@ -89,7 +99,8 @@ public class AquaDockerScannerBuilder extends Builder {
 	int exitCode = ScannerExecuter.execute(build, launcher, listener,
 					       aquaScannerImage, apiURL, user, password, timeout,
 					       locationType, localImage, registry, hostedImage,
-					       onDisallowed == null || ! onDisallowed.equals("fail"));
+					       onDisallowed == null || ! onDisallowed.equals("fail"),
+					       notCompliesCmd);
 	build.addAction(new AquaScannerAction(build));
 
 	archiveArtifacts(build, launcher, listener);

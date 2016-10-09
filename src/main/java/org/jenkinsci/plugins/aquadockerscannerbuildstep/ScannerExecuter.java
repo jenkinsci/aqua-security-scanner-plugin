@@ -29,7 +29,8 @@ public class ScannerExecuter {
 			      String localImage,
 			      String registry,
 			      String hostedImage,
-			      boolean checkonly) {
+			      boolean checkonly,
+			      String notCompliesCmd) {
 
 	PrintStream print_stream = null;
 	try {
@@ -84,6 +85,17 @@ public class ScannerExecuter {
 	    FilePath outFilePath = new FilePath(outFile);
 	    outFilePath.copyTo(target);   
 
+	    // Possibly run a shell command on non compliance
+	    if (exitCode == AquaDockerScannerBuilder.DISALLOWED_CODE && ! notCompliesCmd.trim().isEmpty()) {
+		ps = launcher.launch();
+		args = new ArgumentListBuilder();
+		args.add("bash", "-c", notCompliesCmd);
+		ps.cmds(args);
+		ps.stdin(null);
+		ps.stderr(listener.getLogger());
+		ps.stdout(listener.getLogger());
+		ps.join();  // RUN !
+	    }	    
 	    return exitCode;
 	} catch (RuntimeException e) {
 	    listener.getLogger().println("RuntimeException:" + e.toString());

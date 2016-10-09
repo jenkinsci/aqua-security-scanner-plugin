@@ -6,13 +6,20 @@
     See global.jelly for a general discussion about jelly script.
   -->
 
-   <f:entry name="complianceBehavior" title="When image doesn’t comply with Aqua policy" field="onDisallowed">
-     <select name="onDisallowed">
-       <f:option value="ignore" selected="${instance.onDisallowed != 'fail'}">Log and ignore</f:option>
-       <f:option value="fail" selected="${instance.onDisallowed == 'fail'}">Build fails</f:option>
-     </select>
-   </f:entry>
+   <f:block>
+     <b>When image doesn’t comply with Aqua policy:</b>
+   </f:block>
+   <f:radioBlock checked="${instance.isOnDisallowed('logAndIgnore') or true}" name="onDisallowed" value="ignore" title="Log and ignore" inline="true" help="/plugin/aqua-security-scanner/help-logAndIgnore.html">
+   </f:radioBlock>
+   <f:radioBlock checked="${instance.isOnDisallowed('fail')}" name="onDisallowed" value="fail" title="Build fails" inline="true" help="/plugin/aqua-security-scanner/help-buildFails.html">
+      <f:entry title="Shell command to execute when no compliance" field="notCompliesCmd">
+	<f:textbox />
+      </f:entry>
+   </f:radioBlock>
 
+   <f:block>
+     <b>Image to scan:</b>
+   </f:block>
    <f:radioBlock checked="${instance.isLocationType('local') or true}" name="locationType" value="local" title="Local image" inline="true" help="/plugin/aqua-security-scanner/help-isLocal.html">
       <f:entry title="Image name" field="localImage">
 	<f:textbox />
