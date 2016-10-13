@@ -72,12 +72,22 @@ public class AquaDockerScannerBuilder extends Builder {
 
     // Returns the 'checked' state of the radio button for the step GUI
     public String isLocationType(String type) {
-        return this.locationType.equals(type) ? "true" : "false";
+	if (this.locationType == null) {
+	    // default for new step GUI
+	    return "local".equals(type) ? "true" : "false";
+	} else {
+	    return this.locationType.equals(type) ? "true" : "false";
+	}
     }
 
     // Returns the 'checked' state of the radio button for the step GUI
     public String isOnDisallowed(String state) {
-        return this.onDisallowed.equals(state) ? "true" : "false";
+	if (this.onDisallowed == null) {
+	    // default for new step GUI
+	    return "ignore".equals(state) ? "true" : "false";
+	} else {
+	    return this.onDisallowed.equals(state) ? "true" : "false";
+	}
     }
 
     @Override

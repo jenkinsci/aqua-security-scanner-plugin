@@ -9,7 +9,7 @@
    <f:block>
      <b>When image doesn’t comply with Aqua policy:</b>
    </f:block>
-   <f:radioBlock checked="${instance.isOnDisallowed('logAndIgnore') or true}" name="onDisallowed" value="ignore" title="Log and ignore" inline="true" help="/plugin/aqua-security-scanner/help-logAndIgnore.html">
+   <f:radioBlock checked="${instance.isOnDisallowed('ignore') or true}" name="onDisallowed" value="ignore" title="Log and ignore" inline="true" help="/plugin/aqua-security-scanner/help-logAndIgnore.html">
    </f:radioBlock>
    <f:radioBlock checked="${instance.isOnDisallowed('fail')}" name="onDisallowed" value="fail" title="Build fails" inline="true" help="/plugin/aqua-security-scanner/help-buildFails.html">
       <f:entry title="Shell command to execute when no compliance" field="notCompliesCmd">
