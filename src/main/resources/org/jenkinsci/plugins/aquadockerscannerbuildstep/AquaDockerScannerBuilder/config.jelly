@@ -32,6 +32,12 @@
       <f:entry title="Image name" field="hostedImage">
 	<f:textbox />
       </f:entry>
+      <f:entry title="Hide base image vulnerabilities" field="hideBase">
+	<f:checkbox name="hideBase"/>
+      </f:entry>
    </f:radioBlock>
-
+   <f:entry title="Show negligible vulnerabilities" field="showNegligible">
+     <f:checkbox name="showNegligible"/>
+   </f:entry>
+   
 </j:jelly>

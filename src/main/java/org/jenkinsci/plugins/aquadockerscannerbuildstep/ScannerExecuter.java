@@ -29,6 +29,8 @@ public class ScannerExecuter {
 			      String localImage,
 			      String registry,
 			      String hostedImage,
+			      boolean hideBase,
+			      boolean showNegligible,
 			      boolean checkonly,
 			      String notCompliesCmd) {
 
@@ -52,6 +54,9 @@ public class ScannerExecuter {
 		    args.add("--timeout", String.valueOf(timeout));
 		}
 		passwordIndex = 7;
+		if (hideBase) {
+		    args.add("--hide-base");
+		}
 		break;
 	    case "local":
 		args.add("docker", "run",  "--rm", "-v", "/var/run/docker.sock:/var/run/docker.sock", aquaScannerImage,
@@ -62,7 +67,10 @@ public class ScannerExecuter {
 	    default:
 		return -1;
 	    }
-
+	    
+	    if (showNegligible) {
+		args.add("--show-negligible");
+	    }
 	    if (checkonly) {
 		args.add("--checkonly");
 	    }

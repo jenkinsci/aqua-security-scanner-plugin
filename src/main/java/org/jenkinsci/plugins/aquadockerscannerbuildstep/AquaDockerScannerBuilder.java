@@ -36,16 +36,27 @@ public class AquaDockerScannerBuilder extends Builder {
     private final String hostedImage;
     private final String onDisallowed;
     private final String notCompliesCmd;
+    private final boolean hideBase;
+    private final boolean showNegligible;
 
     // Fields in config.jelly must match the parameter names in the "DataBoundConstructor"
     @DataBoundConstructor
-    public AquaDockerScannerBuilder(String locationType, String registry, String localImage, String hostedImage, String onDisallowed, String notCompliesCmd) {
+    public AquaDockerScannerBuilder(String locationType,
+				    String registry,
+				    String localImage,
+				    String hostedImage,
+				    String onDisallowed,
+				    String notCompliesCmd,
+				    boolean hideBase,
+				    boolean showNegligible) {
 	this.locationType = locationType;
         this.registry = registry;
         this.localImage = localImage;
         this.hostedImage = hostedImage;
         this.onDisallowed = onDisallowed;
         this.notCompliesCmd = notCompliesCmd;
+	this.hideBase = hideBase;
+	this.showNegligible = showNegligible;
     }
 
     /**
@@ -68,6 +79,12 @@ public class AquaDockerScannerBuilder extends Builder {
     }
     public String getNotCompliesCmd() {
         return notCompliesCmd;
+    }
+    public boolean getHideBase() {
+        return hideBase;
+    }
+    public boolean getShowNegligible() {
+        return showNegligible;
     }
 
     // Returns the 'checked' state of the radio button for the step GUI
@@ -109,6 +126,7 @@ public class AquaDockerScannerBuilder extends Builder {
 	int exitCode = ScannerExecuter.execute(build, launcher, listener,
 					       aquaScannerImage, apiURL, user, password, timeout,
 					       locationType, localImage, registry, hostedImage,
+					       hideBase, showNegligible,
 					       onDisallowed == null || ! onDisallowed.equals("fail"),
 					       notCompliesCmd);
 	build.addAction(new AquaScannerAction(build));
@@ -152,7 +170,7 @@ public class AquaDockerScannerBuilder extends Builder {
          * To persist global configuration information,
          * simply store it in a field and call save().
          */
-        private String aquaScannerImage = "aquasec/scanner-cli:1.2"; // Default value
+        private String aquaScannerImage = "aquasec/scanner-cli:2.0"; // Default value
         private String apiURL;
         private String user;
         private String password;
