@@ -42,6 +42,14 @@ public class AquaDockerScannerBuilder extends Builder {
     private static int count;
     private static int buildId = 0;
 
+    public synchronized static void setCount(int count) {
+	AquaDockerScannerBuilder.count = count;
+    }
+
+    public synchronized static void setBuildId(int buildId) {
+	AquaDockerScannerBuilder.buildId = buildId;
+    }
+
     // Fields in config.jelly must match the parameter names in the "DataBoundConstructor"
     @DataBoundConstructor
     public AquaDockerScannerBuilder(String locationType,
@@ -130,12 +138,12 @@ public class AquaDockerScannerBuilder extends Builder {
 	String artifactSuffix, artifactName;
 	if (build.hashCode() != buildId ) {
 	    // New build
-	    buildId = build.hashCode();
-	    count = 1;
+	    setBuildId(build.hashCode());
+	    setCount(1);
 	    artifactSuffix = null; // When ther is only one step, there should be no suffix at all
 	    artifactName = "scanout.html";
 	} else {
-	    count++;
+	    setCount(count + 1);
 	    artifactSuffix = Integer.toString(count);
 	    artifactName = "scanout-" + artifactSuffix + ".html";
 	}
