@@ -2,7 +2,7 @@
 <j:jelly xmlns:j="jelly:core" xmlns:d="jelly:define" xmlns:l="/lib/layout"
          xmlns:t="/lib/hudson" xmlns:f="/lib/form" xmlns:i="jelly:fmt">
     <t:summary href="aqua-results" icon="/plugin/aqua-security-scanner/images/aqua.png">
-        <a href="aqua-results">Aqua Security Scanner</a>
+        <a href="${it.urlName}">${it.displayName}</a>
     </t:summary>
 </j:jelly>
 

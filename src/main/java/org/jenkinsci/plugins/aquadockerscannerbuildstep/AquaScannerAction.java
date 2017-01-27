@@ -7,10 +7,12 @@ public class AquaScannerAction implements Action {
 
     private String resultsUrl;
     private AbstractBuild<?,?> build;
+    private String artifactSuffix;
 
-    public AquaScannerAction(AbstractBuild<?,?> build) {
+    public AquaScannerAction(AbstractBuild<?,?> build, String artifactSuffix, String artifactName) {
         this.build = build;
-        this.resultsUrl = "../artifact/scanout.html";
+        this.artifactSuffix = artifactSuffix;
+        this.resultsUrl = "../artifact/" + artifactName;
     }
 
     @Override
@@ -22,13 +24,21 @@ public class AquaScannerAction implements Action {
     @Override
     public String getDisplayName() {
         // return the label for your link
-        return "Aqua Security Scanner";
+	if (artifactSuffix == null) {
+	    return "Aqua Security Scanner";
+	} else {
+	    return "Aqua Security Scanner " + artifactSuffix;
+	}
     }
 
     @Override
     public String getUrlName() {
         // defines the suburl, which is appended to ...jenkins/job/jobname
-        return "aqua-results";
+	if (artifactSuffix == null) {
+	    return "aqua-results";
+	} else {
+	    return "aqua-results-" + artifactSuffix;
+	}
     }
 
     public AbstractBuild<?,?> getBuild() {

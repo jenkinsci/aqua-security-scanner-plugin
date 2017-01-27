@@ -39,6 +39,9 @@ public class AquaDockerScannerBuilder extends Builder {
     private final boolean hideBase;
     private final boolean showNegligible;
 
+    private static int count;
+    private static int buildId = 0;
+
     // Fields in config.jelly must match the parameter names in the "DataBoundConstructor"
     @DataBoundConstructor
     public AquaDockerScannerBuilder(String locationType,
@@ -123,13 +126,27 @@ public class AquaDockerScannerBuilder extends Builder {
 	    apiURL = "https://" + apiURL;
 	}
 	
-	int exitCode = ScannerExecuter.execute(build, launcher, listener,
+	// Support unique names for artifacts when there are multiple steps in the same build
+	String artifactSuffix, artifactName;
+	if (build.hashCode() != buildId ) {
+	    // New build
+	    buildId = build.hashCode();
+	    count = 1;
+	    artifactSuffix = null; // When ther is only one step, there should be no suffix at all
+	    artifactName = "scanout.html";
+	} else {
+	    count++;
+	    artifactSuffix = Integer.toString(count);
+	    artifactName = "scanout-" + artifactSuffix + ".html";
+	}
+
+	int exitCode = ScannerExecuter.execute(build, launcher, listener, artifactName,
 					       aquaScannerImage, apiURL, user, password, timeout,
 					       locationType, localImage, registry, hostedImage,
 					       hideBase, showNegligible,
 					       onDisallowed == null || ! onDisallowed.equals("fail"),
 					       notCompliesCmd);
-	build.addAction(new AquaScannerAction(build));
+	build.addAction(new AquaScannerAction(build, artifactSuffix, artifactName));
 
 	archiveArtifacts(build, launcher, listener);
 

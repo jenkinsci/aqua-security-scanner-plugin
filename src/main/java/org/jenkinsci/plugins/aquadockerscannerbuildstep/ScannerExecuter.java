@@ -20,6 +20,7 @@ public class ScannerExecuter {
     public static int execute(AbstractBuild build,
 			      Launcher launcher,
 			      BuildListener listener,
+			      String artifactName,
 			      String aquaScannerImage,
 			      String apiURL,
 			      String user,
@@ -89,7 +90,7 @@ public class ScannerExecuter {
 
 	    // Copy local file to workspace FilePath object (which might be on remote machine)
 	    FilePath workspace = build.getWorkspace();
-	    FilePath target = new FilePath(workspace, "scanout.html");
+	    FilePath target = new FilePath(workspace, artifactName);
 	    FilePath outFilePath = new FilePath(outFile);
 	    outFilePath.copyTo(target);   
 
