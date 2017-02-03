@@ -26,6 +26,7 @@ public class ScannerExecuter {
 			      String user,
 			      String password,
 			      int timeout,
+			      String runOptions,
 			      String locationType,
 			      String localImage,
 			      String registry,
@@ -48,7 +49,9 @@ public class ScannerExecuter {
 	    ArgumentListBuilder args = new ArgumentListBuilder();
 	    switch (locationType) {
 	    case "hosted":
-		args.add("docker", "run",  "--privileged", "--rm", aquaScannerImage,
+		args.add("docker", "run");
+		args.addTokenized(runOptions);
+		args.add("--rm", aquaScannerImage,
 			 "--user", user, "--password", password, "--host", apiURL,
 			 "--registry", registry, "--image", hostedImage, "--html");
 		if (timeout > 0) {  // 0 means use default
@@ -60,7 +63,9 @@ public class ScannerExecuter {
 		}
 		break;
 	    case "local":
-		args.add("docker", "run",  "--privileged", "--rm", "-v", "/var/run/docker.sock:/var/run/docker.sock", aquaScannerImage,
+		args.add("docker", "run");
+		args.addTokenized(runOptions);
+		args.add("--rm", "-v", "/var/run/docker.sock:/var/run/docker.sock", aquaScannerImage,
 			 "--user", user, "--password", password, "--host", apiURL,
 			 "--local", "--image", localImage, "--html");
 		passwordIndex = 9;

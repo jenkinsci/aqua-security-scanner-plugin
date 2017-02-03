@@ -19,5 +19,8 @@
     <f:entry title="Timeout" field="timeout">
       <f:textbox />
     </f:entry>
+    <f:entry title="Additional Docker run options" field="runOptions">
+      <f:textbox />
+    </f:entry>
   </f:section>
 </j:jelly>

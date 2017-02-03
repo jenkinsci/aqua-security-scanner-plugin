@@ -128,6 +128,12 @@ public class AquaDockerScannerBuilder extends Builder {
 	String user = getDescriptor().getUser();
 	String password = getDescriptor().getPassword();
 	int timeout = getDescriptor().getTimeout();
+	String runOptions = getDescriptor().getRunOptions();
+
+	if (apiURL == null || apiURL.trim().equals("") || user == null || user.trim().equals("") || password == null || password.trim().equals("")) {
+	    listener.getLogger().println("\nERROR: Missing configuration. Please set the global configuration parameters in The \"Aqua Security\" section under  \"Manage Jenkins/Configure System\", before continuing.\n");
+	    return false;
+	}
 
 	// Allow API urls without the protocol part, add the "https://" in this case
 	if (apiURL.indexOf("://") == -1) {
@@ -149,7 +155,7 @@ public class AquaDockerScannerBuilder extends Builder {
 	}
 
 	int exitCode = ScannerExecuter.execute(build, launcher, listener, artifactName,
-					       aquaScannerImage, apiURL, user, password, timeout,
+					       aquaScannerImage, apiURL, user, password, timeout, runOptions,
 					       locationType, localImage, registry, hostedImage,
 					       hideBase, showNegligible,
 					       onDisallowed == null || ! onDisallowed.equals("fail"),
@@ -200,6 +206,7 @@ public class AquaDockerScannerBuilder extends Builder {
         private String user;
         private String password;
 	private int timeout;
+        private String runOptions;
 
         /**
          * In order to load the persisted global configuration, you have to 
@@ -252,6 +259,7 @@ public class AquaDockerScannerBuilder extends Builder {
 	    } catch (net.sf.json.JSONException e) {
 		throw new FormException("Timeout value must be a number.", "timeout");
 	    }	
+            runOptions = formData.getString("runOptions");
             save();
 	    return super.configure(req, formData);
         }
@@ -270,6 +278,9 @@ public class AquaDockerScannerBuilder extends Builder {
         }
         public int getTimeout() {
             return timeout;
+        }
+        public String getRunOptions() {
+            return runOptions;
         }
     }
 }
