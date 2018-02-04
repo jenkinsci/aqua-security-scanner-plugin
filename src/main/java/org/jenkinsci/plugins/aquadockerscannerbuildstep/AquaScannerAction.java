@@ -1,15 +1,15 @@
 package org.jenkinsci.plugins.aquadockerscannerbuildstep;
 
 import hudson.model.Action;
-import hudson.model.AbstractBuild;
+import hudson.model.Run;
 
 public class AquaScannerAction implements Action {
 
     private String resultsUrl;
-    private AbstractBuild<?,?> build;
+    private Run<?, ?> build;
     private String artifactSuffix;
 
-    public AquaScannerAction(AbstractBuild<?,?> build, String artifactSuffix, String artifactName) {
+    public AquaScannerAction(Run<?, ?> build, String artifactSuffix, String artifactName) {
         this.build = build;
         this.artifactSuffix = artifactSuffix;
         this.resultsUrl = "../artifact/" + artifactName;
@@ -41,7 +41,7 @@ public class AquaScannerAction implements Action {
 	}
     }
 
-    public AbstractBuild<?,?> getBuild() {
+    public Run<?, ?> getBuild() {
         return this.build;
     }
 
