@@ -147,9 +147,7 @@ public class AquaDockerScannerBuilder extends Builder implements SimpleBuildStep
 
 		if (apiURL == null || apiURL.trim().equals("") || user == null || user.trim().equals("") || password == null
 				|| password.trim().equals("")) {
-			listener.getLogger().println(
-					"\nERROR: Missing configuration. Please set the global configuration parameters in The \"Aqua Security\" section under  \"Manage Jenkins/Configure System\", before continuing.\n");
-			//return false;
+				throw new AbortException("Missing configuration. Please set the global configuration parameters in The \"Aqua Security\" section under  \"Manage Jenkins/Configure System\", before continuing.\n");
 		}
 
 		// Allow API urls without the protocol part, add the "https://" in this case
@@ -180,18 +178,16 @@ public class AquaDockerScannerBuilder extends Builder implements SimpleBuildStep
 		archiveArtifacts(build, workspace, launcher, listener);
 
 		System.out.println("exitCode: " + exitCode);
+		String failedMessage = "Scanning failed.";
 		switch (exitCode) {
 		case OK_CODE:
-				System.out.println("OK_CODE");
-			  //break;
-			//return true;
+				System.out.println("Scanning success.");
+				break;
 		case DISALLOWED_CODE:
-				//System.out.println("DISALLOWED_CODE");
-			  break;
-			//return false;
+				throw new AbortException(failedMessage);
 		default:
 			// This exception causes the message to appear in the Jenkins console
-			throw new AbortException("Scanning failed.");
+			throw new AbortException(failedMessage);
 		}
 	}
 
