@@ -43,7 +43,7 @@ public class ScannerExecuter {
 				args.addTokenized(runOptions);
 				if (version.trim().equals("2.x")) {
 					args.add("--rm", aquaScannerImage, "--user", user, "--password", password, "--host", apiURL,
-							"--registry", registry, "--image", hostedImage, "--html");
+							"--registry", registry, "--image", hostedImage, "--htmlfile", artifactName);
 					if (timeout > 0) { // 0 means use default
 						args.add("--timeout", String.valueOf(timeout));
 					}
@@ -52,7 +52,7 @@ public class ScannerExecuter {
 				} else if (version.trim().equals("3.x")) {
 					args.add("--rm", "-v", "/var/run/docker.sock:/var/run/docker.sock", aquaScannerImage, "scan",
 							"--user", user, "--password", password, "--host", apiURL, "--registry", registry,
-							hostedImage, "--html");
+							hostedImage, "--htmlfile", artifactName);
 					passwordIndex = 10;
 				}
 
@@ -65,11 +65,11 @@ public class ScannerExecuter {
 				args.addTokenized(runOptions);
 				if (version.trim().equals("2.x")) {
 					args.add("--rm", "-v", "/var/run/docker.sock:/var/run/docker.sock", aquaScannerImage, "--user",
-							user, "--password", password, "--host", apiURL, "--local", "--image", localImage, "--html");
+							user, "--password", password, "--host", apiURL, "--local", "--image", localImage, "--htmlfile", artifactName);
 					passwordIndex = 9;
 				} else if (version.trim().equals("3.x")) {
 					args.add("--rm", "-v", "/var/run/docker.sock:/var/run/docker.sock", aquaScannerImage, "scan",
-							"--user", user, "--password", password, "--host", apiURL, "--local", localImage, "--html");
+							"--user", user, "--password", password, "--host", apiURL, "--local", localImage, "--htmlfile", artifactName);
 					passwordIndex = 10;
 				}
 
