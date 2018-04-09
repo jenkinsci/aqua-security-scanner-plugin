@@ -10,7 +10,7 @@
   </parent>
   <groupId>org.jenkins-ci.plugins</groupId>
   <artifactId>aqua-security-scanner</artifactId>
-  <version>3.0.3</version>
+  <version>3.0.4-SNAPSHOT</version>
   <packaging>hpi</packaging>
 
   <properties>
@@ -100,7 +100,7 @@
     <connection>scm:git:git://github.com/jenkinsci/${project.artifactId}-plugin.git</connection>
     <developerConnection>scm:git:git@github.com:jenkinsci/${project.artifactId}-plugin.git</developerConnection>
     <url>http://github.com/jenkinsci/${project.artifactId}-plugin</url>
-    <tag>aqua-security-scanner-3.0.3</tag>
+    <tag>aqua-security-scanner-3.0.2</tag>
   </scm>
 
   <distributionManagement>
