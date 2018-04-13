@@ -52,13 +52,13 @@ public class ScannerExecuter {
 					if (timeout > 0) { // 0 means use default
 						args.add("--timeout", String.valueOf(timeout));
 					}
-					passwordIndex = 7 + runOptionsCount;
+					passwordIndex = 7;
 
 				} else if (version.trim().equals("3.x")) {
 					args.add("--rm", "-v", "/var/run/docker.sock:/var/run/docker.sock", aquaScannerImage, "scan",
 							"--user", user, "--password", password, "--host", apiURL, "--registry", registry,
 							hostedImage, "--html");
-					passwordIndex = 10 + runOptionsCount;
+					passwordIndex = 10;
 				}
 
 				if (hideBase) {
@@ -74,11 +74,11 @@ public class ScannerExecuter {
 				if (version.trim().equals("2.x")) {
 					args.add("--rm", "-v", "/var/run/docker.sock:/var/run/docker.sock", aquaScannerImage, "--user",
 							user, "--password", password, "--host", apiURL, "--local", "--image", localImage, "--html");
-					passwordIndex = 9 + runOptionsCount;
+					passwordIndex = 9;
 				} else if (version.trim().equals("3.x")) {
 					args.add("--rm", "-v", "/var/run/docker.sock:/var/run/docker.sock", aquaScannerImage, "scan",
 							"--user", user, "--password", password, "--host", apiURL, "--local", localImage, "--html");
-					passwordIndex = 10 + runOptionsCount;
+					passwordIndex = 10;
 				}
 				if (register) {
 					args.add("--registry", registry);
@@ -104,6 +104,7 @@ public class ScannerExecuter {
 			print_stream = new PrintStream(outFile, "UTF-8");
 			ps.stdout(print_stream);
 			boolean[] masks = new boolean[ps.cmds().size()];
+			passwordIndex = passwordIndex + runOptionsCount;
 			masks[passwordIndex] = true; // Mask out password
 
 			ps.masks(masks);
