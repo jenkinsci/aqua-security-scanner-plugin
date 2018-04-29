@@ -38,6 +38,7 @@ public class AquaDockerScannerBuilder extends Builder implements SimpleBuildStep
 	public static final int DISALLOWED_CODE = 4;
 	private final String locationType;
 	private final String registry;
+	private final boolean register;
 	private final String localImage;
 	private final String hostedImage;
 	private final String onDisallowed;
@@ -59,10 +60,11 @@ public class AquaDockerScannerBuilder extends Builder implements SimpleBuildStep
 	// Fields in config.jelly must match the parameter names in the
 	// "DataBoundConstructor"
 	@DataBoundConstructor
-	public AquaDockerScannerBuilder(String locationType, String registry, String localImage, String hostedImage,
+	public AquaDockerScannerBuilder(String locationType, String registry, boolean register, String localImage, String hostedImage,
 			String onDisallowed, String notCompliesCmd,  boolean hideBase, boolean showNegligible) {
 		this.locationType = locationType;
 		this.registry = registry;
+		this.register = register;
 		this.localImage = localImage;
 		this.hostedImage = hostedImage;
 		this.onDisallowed = onDisallowed;
@@ -81,6 +83,10 @@ public class AquaDockerScannerBuilder extends Builder implements SimpleBuildStep
 
 	public String getRegistry() {
 		return registry;
+	}
+
+	public boolean getRegister() {
+		return register;
 	}
 
 	public String getLocalImage() {
@@ -171,7 +177,7 @@ public class AquaDockerScannerBuilder extends Builder implements SimpleBuildStep
 		}
 
 		int exitCode = ScannerExecuter.execute(build, workspace,launcher, listener, artifactName, aquaScannerImage, apiURL, user,
-				password, version, timeout, runOptions, locationType, localImage, registry, hostedImage, hideBase,
+				password, version, timeout, runOptions, locationType, localImage, registry, register, hostedImage, hideBase,
 				showNegligible, onDisallowed == null || !onDisallowed.equals("fail"), notCompliesCmd);
 		build.addAction(new AquaScannerAction(build, artifactSuffix, artifactName));
 

@@ -23,7 +23,7 @@ public class ScannerExecuter {
 
 	public static int execute(Run<?, ?> build, FilePath workspace, Launcher launcher, TaskListener listener, String artifactName,
 			String aquaScannerImage, String apiURL, String user, String password, String version, int timeout,
-			String runOptions, String locationType, String localImage, String registry, String hostedImage,
+			String runOptions, String locationType, String localImage, String registry, boolean register, String hostedImage,
 			boolean hideBase, boolean showNegligible, boolean checkonly, String notCompliesCmd) {
 
 		PrintStream print_stream = null;
@@ -36,6 +36,11 @@ public class ScannerExecuter {
 			hostedImage = env.expand(hostedImage);
 
 			int passwordIndex = -1;
+			int runOptionsCount = 0;
+			if(runOptions != null && !runOptions.isEmpty()){
+				runOptionsCount = countRunOptions(runOptions);
+			}
+
 			ArgumentListBuilder args = new ArgumentListBuilder();
 			switch (locationType) {
 			case "hosted":
@@ -59,6 +64,9 @@ public class ScannerExecuter {
 				if (hideBase) {
 					args.add("--hide-base");
 				}
+				if (register) {
+					args.add("--register");
+				}
 				break;
 			case "local":
 				args.add("docker", "run");
@@ -72,7 +80,10 @@ public class ScannerExecuter {
 							"--user", user, "--password", password, "--host", apiURL, "--local", localImage, "--html");
 					passwordIndex = 10;
 				}
-
+				if (register) {
+					args.add("--registry", registry);
+					args.add("--register");
+				}
 				break;
 			default:
 				return -1;
@@ -93,7 +104,7 @@ public class ScannerExecuter {
 			print_stream = new PrintStream(outFile, "UTF-8");
 			ps.stdout(print_stream);
 			boolean[] masks = new boolean[ps.cmds().size()];
-
+			passwordIndex = passwordIndex + runOptionsCount;
 			masks[passwordIndex] = true; // Mask out password
 
 			ps.masks(masks);
@@ -132,5 +143,17 @@ public class ScannerExecuter {
 				print_stream.close();
 			}
 		}
+	}
+	private static int countRunOptions(String runOptions) {
+		int runOptionsLen = runOptions.length();
+		int runOptionsCount = 1;
+		char checkSpace;
+		for(int i=0;i<runOptionsLen;i++)
+		{
+			checkSpace = runOptions.charAt(i);
+			if (checkSpace == ' ')
+			runOptionsCount++;
+		}
+		return runOptionsCount;
 	}
 }
