@@ -201,7 +201,7 @@ public class AquaDockerScannerBuilder extends Builder implements SimpleBuildStep
 	@SuppressFBWarnings("NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE") // No idea why this is needed
 	private void archiveArtifacts(Run<?, ?> build, FilePath workspace, Launcher launcher, TaskListener listener)
 			throws java.lang.InterruptedException {
-		ArtifactArchiver artifactArchiver = new ArtifactArchiver("scanout.html");
+		ArtifactArchiver artifactArchiver = new ArtifactArchiver("scanout*");
 		artifactArchiver.perform(build, workspace, launcher, listener);
 	}
 
