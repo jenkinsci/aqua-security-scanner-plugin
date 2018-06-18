@@ -29,5 +29,8 @@
     <f:entry title="Additional Docker run options" field="runOptions">
       <f:textbox />
     </f:entry>
+    <f:entry title="Do not verify TLS certificates.">
+      <f:checkbox name="caCertificates" field="caCertificates"/>
+    </f:entry>
   </f:section>
 </j:jelly>
