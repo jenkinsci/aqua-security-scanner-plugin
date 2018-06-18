@@ -150,7 +150,7 @@ public class AquaDockerScannerBuilder extends Builder implements SimpleBuildStep
 		String version = getDescriptor().getVersion();
 		int timeout = getDescriptor().getTimeout();
 		String runOptions = getDescriptor().getRunOptions();
-
+		boolean caCertificates = getDescriptor().getCaCertificates();
 		if (apiURL == null || apiURL.trim().equals("") || user == null || user.trim().equals("") || password == null
 				|| password.trim().equals("")) {
 				throw new AbortException("Missing configuration. Please set the global configuration parameters in The \"Aqua Security\" section under  \"Manage Jenkins/Configure System\", before continuing.\n");
@@ -178,7 +178,7 @@ public class AquaDockerScannerBuilder extends Builder implements SimpleBuildStep
 
 		int exitCode = ScannerExecuter.execute(build, workspace,launcher, listener, artifactName, aquaScannerImage, apiURL, user,
 				password, version, timeout, runOptions, locationType, localImage, registry, register, hostedImage, hideBase,
-				showNegligible, onDisallowed == null || !onDisallowed.equals("fail"), notCompliesCmd);
+				showNegligible, onDisallowed == null || !onDisallowed.equals("fail"), notCompliesCmd, caCertificates);
 		build.addAction(new AquaScannerAction(build, artifactSuffix, artifactName));
 
 		archiveArtifacts(build, workspace, launcher, listener);
@@ -232,6 +232,7 @@ public class AquaDockerScannerBuilder extends Builder implements SimpleBuildStep
 		private String version;
 		private int timeout;
 		private String runOptions;
+		private boolean caCertificates;
 
 		/**
 		 * In order to load the persisted global configuration, you have to call load()
@@ -284,6 +285,7 @@ public class AquaDockerScannerBuilder extends Builder implements SimpleBuildStep
 				throw new FormException("Timeout value must be a number.", "timeout");
 			}
 			runOptions = formData.getString("runOptions");
+			caCertificates = formData.getBoolean("caCertificates");
 			save();
 			return super.configure(req, formData);
 		}
@@ -325,6 +327,9 @@ public class AquaDockerScannerBuilder extends Builder implements SimpleBuildStep
 			} else {
 				return getVersion().equals(ver) ? "true" : "false";
 			}
+		}
+		public boolean getCaCertificates() {
+			return caCertificates;
 		}
 	}
 }
