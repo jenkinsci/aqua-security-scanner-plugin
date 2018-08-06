@@ -35,30 +35,22 @@ public class ScannerExecuter {
 			registry = env.expand(registry);
 			hostedImage = env.expand(hostedImage);
 
-			int passwordIndex = -1;
-			int runOptionsCount = 0;
-			if(runOptions != null && !runOptions.isEmpty()){
-				runOptionsCount = countRunOptions(runOptions);
-			}
-
 			ArgumentListBuilder args = new ArgumentListBuilder();
+			args.add("docker", "run");
 			switch (locationType) {
 			case "hosted":
-				args.add("docker", "run");
 				args.addTokenized(runOptions);
 				if (version.trim().equals("2.x")) {
-					args.add("--rm", aquaScannerImage, "--user", user, "--password", password, "--host", apiURL,
-							"--registry", registry, "--image", hostedImage, "--html");
+					args.add("--rm", aquaScannerImage, "--host", apiURL,
+							"--registry", registry, "--image", hostedImage);
 					if (timeout > 0) { // 0 means use default
 						args.add("--timeout", String.valueOf(timeout));
 					}
-					passwordIndex = 7;
 
 				} else if (version.trim().equals("3.x")) {
 					args.add("--rm", "-v", "/var/run/docker.sock:/var/run/docker.sock", aquaScannerImage, "scan",
-							"--user", user, "--password", password, "--host", apiURL, "--registry", registry,
-							hostedImage, "--html");
-					passwordIndex = 10;
+					    "--host", apiURL, "--registry", registry,
+							hostedImage);
 				}
 
 				if (hideBase) {
@@ -69,16 +61,11 @@ public class ScannerExecuter {
 				}
 				break;
 			case "local":
-				args.add("docker", "run");
 				args.addTokenized(runOptions);
 				if (version.trim().equals("2.x")) {
-					args.add("--rm", "-v", "/var/run/docker.sock:/var/run/docker.sock", aquaScannerImage, "--user",
-							user, "--password", password, "--host", apiURL, "--local", "--image", localImage, "--html");
-					passwordIndex = 9;
+					args.add("--rm", "-v", "/var/run/docker.sock:/var/run/docker.sock", aquaScannerImage, "--host", apiURL, "--local", "--image", localImage);
 				} else if (version.trim().equals("3.x")) {
-					args.add("--rm", "-v", "/var/run/docker.sock:/var/run/docker.sock", aquaScannerImage, "scan",
-							"--user", user, "--password", password, "--host", apiURL, "--local", localImage, "--html");
-					passwordIndex = 10;
+					args.add("--rm", "-v", "/var/run/docker.sock:/var/run/docker.sock", aquaScannerImage, "scan", "--host", apiURL, "--local", localImage);
 				}
 				if (register) {
 					args.add("--registry", registry);
@@ -99,18 +86,18 @@ public class ScannerExecuter {
 				args.add("--no-verify");
 			}
 
+			args.add("--html", "--user", user, "--password");
+			args.addMasked(password);
+
 			File outFile = new File(build.getRootDir(), "out");
 			Launcher.ProcStarter ps = launcher.launch();
 			ps.cmds(args);
 			ps.stdin(null);
-			ps.stderr(listener.getLogger());
 			print_stream = new PrintStream(outFile, "UTF-8");
+			ps.stderr(print_stream);
 			ps.stdout(print_stream);
-			boolean[] masks = new boolean[ps.cmds().size()];
-			passwordIndex = passwordIndex + runOptionsCount;
-			masks[passwordIndex] = true; // Mask out password
-
-			ps.masks(masks);
+			ps.quiet(true);
+			listener.getLogger().println(args.toString());
 			int exitCode = ps.join(); // RUN !
 
 			// Copy local file to workspace FilePath object (which might be on remote
@@ -120,6 +107,12 @@ public class ScannerExecuter {
 			FilePath outFilePath = new FilePath(outFile);
 			outFilePath.copyTo(target);
 
+			String scanOutput = target.readToString();
+			if (exitCode == 1)
+			{
+				listener.getLogger().println(scanOutput);
+			}
+			cleanBuildOutput(scanOutput, target, listener);
 			// Possibly run a shell command on non compliance
 			if (exitCode == AquaDockerScannerBuilder.DISALLOWED_CODE && !notCompliesCmd.trim().isEmpty()) {
 				ps = launcher.launch();
@@ -147,16 +140,27 @@ public class ScannerExecuter {
 			}
 		}
 	}
-	private static int countRunOptions(String runOptions) {
-		int runOptionsLen = runOptions.length();
-		int runOptionsCount = 1;
-		char checkSpace;
-		for(int i=0;i<runOptionsLen;i++)
+	//Read output save HTML and print stderr
+	private static boolean cleanBuildOutput(String scanOutput, FilePath target, TaskListener listener) {
+
+		int htmlStart = scanOutput.indexOf("<!DOCTYPE html>");
+		if (htmlStart == -1)
 		{
-			checkSpace = runOptions.charAt(i);
-			if (checkSpace == ' ')
-			runOptionsCount++;
+			listener.getLogger().println(scanOutput);
+			return false;
 		}
-		return runOptionsCount;
+		listener.getLogger().println(scanOutput.substring(0,htmlStart));
+		int htmlEnd = scanOutput.lastIndexOf("</html>") + 7;
+		scanOutput = scanOutput.substring(htmlStart,htmlEnd);
+		try
+		{
+			target.write(scanOutput, "UTF-8");
+		}
+		catch (Exception e)
+		{
+			listener.getLogger().println("Failed to save HTML report.");
+		}
+
+		return true;
 	}
 }
