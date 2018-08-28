@@ -325,7 +325,7 @@ public class AquaDockerScannerBuilder extends Builder implements SimpleBuildStep
 			System.out.println("Saved version:" + getVersion());
 			if (getVersion() == null) {
 				// default for new step GUI
-				return "2.x".equals(ver) ? "true" : "false";
+				return "3.x".equals(ver) ? "true" : "false";
 			} else {
 				return getVersion().equals(ver) ? "true" : "false";
 			}
