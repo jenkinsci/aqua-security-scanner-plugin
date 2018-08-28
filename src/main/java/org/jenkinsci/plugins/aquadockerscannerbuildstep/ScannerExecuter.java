@@ -107,6 +107,12 @@ public class ScannerExecuter {
 			FilePath outFilePath = new FilePath(outFile);
 			outFilePath.copyTo(target);
 
+			//css
+			FilePath targetCss = new FilePath(workspace, "styles.css");
+			File cssFile = new File(env.get("JENKINS_HOME") + "/plugins/aqua-security-scanner/css/", "styles.css");
+			FilePath cssFilePath = new FilePath(cssFile);
+			cssFilePath.copyTo(targetCss);
+
 			String scanOutput = target.readToString();
 			if (exitCode == 1)
 			{
