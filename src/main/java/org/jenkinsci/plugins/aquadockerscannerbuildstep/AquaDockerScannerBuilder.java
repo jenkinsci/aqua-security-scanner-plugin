@@ -203,6 +203,8 @@ public class AquaDockerScannerBuilder extends Builder implements SimpleBuildStep
 			throws java.lang.InterruptedException {
 		ArtifactArchiver artifactArchiver = new ArtifactArchiver("scanout*");
 		artifactArchiver.perform(build, workspace, launcher, listener);
+		ArtifactArchiver styleArtifactArchiver = new ArtifactArchiver("styles.css");
+		styleArtifactArchiver.perform(build, workspace, launcher, listener);
 	}
 
 	// Overridden for better type safety.
@@ -323,7 +325,7 @@ public class AquaDockerScannerBuilder extends Builder implements SimpleBuildStep
 			System.out.println("Saved version:" + getVersion());
 			if (getVersion() == null) {
 				// default for new step GUI
-				return "2.x".equals(ver) ? "true" : "false";
+				return "3.x".equals(ver) ? "true" : "false";
 			} else {
 				return getVersion().equals(ver) ? "true" : "false";
 			}
