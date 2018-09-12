@@ -37,6 +37,10 @@ public class ScannerExecuter {
 
 			ArgumentListBuilder args = new ArgumentListBuilder();
 			args.add("docker", "run");
+			String buildJobName = env.get("JOB_NAME");
+			String buildUrl = env.get("BUILD_URL");
+			String buildNumber = env.get("BUILD_NUMBER");
+			args.addTokenized("-e BUILD_JOB_NAME="+buildJobName+" -e BUILD_URL="+buildUrl+" -e BUILD_NUMBER="+buildNumber);
 			switch (locationType) {
 			case "hosted":
 				args.addTokenized(runOptions);
@@ -114,10 +118,6 @@ public class ScannerExecuter {
 			cssFilePath.copyTo(targetCss);
 
 			String scanOutput = target.readToString();
-			if (exitCode == 1)
-			{
-				listener.getLogger().println(scanOutput);
-			}
 			cleanBuildOutput(scanOutput, target, listener);
 			// Possibly run a shell command on non compliance
 			if (exitCode == AquaDockerScannerBuilder.DISALLOWED_CODE && !notCompliesCmd.trim().isEmpty()) {
