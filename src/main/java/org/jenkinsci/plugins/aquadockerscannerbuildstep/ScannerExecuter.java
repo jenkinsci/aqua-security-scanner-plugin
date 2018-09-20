@@ -24,7 +24,7 @@ public class ScannerExecuter {
 	public static int execute(Run<?, ?> build, FilePath workspace, Launcher launcher, TaskListener listener, String artifactName,
 			String aquaScannerImage, String apiURL, String user, String password, String version, int timeout,
 			String runOptions, String locationType, String localImage, String registry, boolean register, String hostedImage,
-			boolean hideBase, boolean showNegligible, boolean checkonly, String notCompliesCmd, boolean caCertificates) {
+			boolean hideBase, boolean showNegligible, boolean checkonly, String notCompliesCmd, boolean caCertificates, String policies) {
 
 		PrintStream print_stream = null;
 		try {
@@ -88,6 +88,9 @@ public class ScannerExecuter {
 			}
 			if (caCertificates) {
 				args.add("--no-verify");
+			}
+			if (policies != null && !policies.equals("")) {
+				args.add("--policies", policies);
 			}
 
 			args.add("--html", "--user", user, "--password");
