@@ -37,7 +37,8 @@ public class ScannerExecuter {
 
 			ArgumentListBuilder args = new ArgumentListBuilder();
 			args.add("docker", "run");
-			String buildJobName = env.get("JOB_NAME");
+			String buildJobName = env.get("JOB_NAME").trim();
+			buildJobName = buildJobName.replaceAll("\\s+", "");
 			String buildUrl = env.get("BUILD_URL");
 			String buildNumber = env.get("BUILD_NUMBER");
 			args.addTokenized("-e BUILD_JOB_NAME="+buildJobName+" -e BUILD_URL="+buildUrl+" -e BUILD_NUMBER="+buildNumber);
