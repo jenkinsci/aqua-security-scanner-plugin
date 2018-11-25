@@ -30,7 +30,7 @@ import org.jenkinsci.Symbol;
  * <p>
  * When a build is performed, the {@link #perform} method will be invoked.
  *
- * @author Moshe Cohen
+ * @author Oran Moshai
  */
 public class AquaDockerScannerBuilder extends Builder implements SimpleBuildStep{
 
