@@ -17,7 +17,7 @@ import hudson.model.TaskListener;
 /**
  * This class does the actual execution..
  *
- * @author Moshe Cohen
+ * @author Oran Moshai
  */
 public class ScannerExecuter {
 
