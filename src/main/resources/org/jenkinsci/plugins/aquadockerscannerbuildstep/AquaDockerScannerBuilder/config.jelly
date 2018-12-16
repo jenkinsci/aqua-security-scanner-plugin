@@ -21,7 +21,7 @@
      <b>Image to scan:</b>
    </f:block>
    <f:radioBlock checked="${instance.isLocationType('local') or true}" name="locationType" value="local" title="Local image" inline="true" help="/plugin/aqua-security-scanner/help-isLocal.html">
-      <f:entry title="Image name" field="localImage">
+    <f:entry title="Image name" field="localImage">
 	<f:textbox />
       </f:entry>
    </f:radioBlock>
@@ -43,6 +43,9 @@
 <f:textbox />
   </f:entry>
    <f:entry title="Policies" field="policies">
+    <f:textbox />
+   </f:entry>
+   <f:entry title="Custom flags" field="customFlags">
     <f:textbox />
    </f:entry>
 
