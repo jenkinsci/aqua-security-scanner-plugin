@@ -46,6 +46,7 @@ public class AquaDockerScannerBuilder extends Builder implements SimpleBuildStep
 	private final boolean hideBase;
 	private final boolean showNegligible;
 	private final String policies;
+	private final String customFlags;
 
 	private static int count;
 	private static int buildId = 0;
@@ -62,7 +63,7 @@ public class AquaDockerScannerBuilder extends Builder implements SimpleBuildStep
 	// "DataBoundConstructor"
 	@DataBoundConstructor
 	public AquaDockerScannerBuilder(String locationType, String registry, boolean register, String localImage, String hostedImage,
-			String onDisallowed, String notCompliesCmd,  boolean hideBase, boolean showNegligible, String policies) {
+			String onDisallowed, String notCompliesCmd,  boolean hideBase, boolean showNegligible, String policies, String customFlags) {
 		this.locationType = locationType;
 		this.registry = registry;
 		this.register = register;
@@ -73,6 +74,7 @@ public class AquaDockerScannerBuilder extends Builder implements SimpleBuildStep
 		this.hideBase = hideBase;
 		this.showNegligible = showNegligible;
 		this.policies = policies;
+		this.customFlags = customFlags;
 	}
 
 	/**
@@ -113,6 +115,10 @@ public class AquaDockerScannerBuilder extends Builder implements SimpleBuildStep
 
 	public String getPolicies() {
 		return policies;
+	}
+
+	public String getCustomFlags() {
+		return customFlags;
 	}
 
 	public boolean getHideBase() {
@@ -184,7 +190,7 @@ public class AquaDockerScannerBuilder extends Builder implements SimpleBuildStep
 
 		int exitCode = ScannerExecuter.execute(build, workspace,launcher, listener, artifactName, aquaScannerImage, apiURL, user,
 				password, version, timeout, runOptions, locationType, localImage, registry, register, hostedImage, hideBase,
-				showNegligible, onDisallowed == null || !onDisallowed.equals("fail"), notCompliesCmd, caCertificates, policies);
+				showNegligible, onDisallowed == null || !onDisallowed.equals("fail"), notCompliesCmd, caCertificates, policies, customFlags);
 		build.addAction(new AquaScannerAction(build, artifactSuffix, artifactName));
 
 		archiveArtifacts(build, workspace, launcher, listener);
