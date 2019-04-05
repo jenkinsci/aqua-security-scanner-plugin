@@ -24,6 +24,8 @@ import hudson.model.Run;
 import hudson.model.TaskListener;
 import jenkins.tasks.SimpleBuildStep;
 import org.jenkinsci.Symbol;
+import hudson.util.Secret;
+
 
 /**
  * This is the builder class.
@@ -240,9 +242,9 @@ public class AquaDockerScannerBuilder extends Builder implements SimpleBuildStep
 		 * call save().
 		 */
 		private String aquaScannerImage = "registry.aquasec.com/scanner:3.5"; // Default value
-		private String apiURL;
-		private String user;
-		private String password;
+		private Secret apiURL;
+		private Secret user;
+		private Secret password;
 		private String version;
 		private int timeout;
 		private String runOptions;
@@ -289,9 +291,9 @@ public class AquaDockerScannerBuilder extends Builder implements SimpleBuildStep
 			// To persist global configuration information,
 			// set that to properties and call save().
 			aquaScannerImage = formData.getString("aquaScannerImage");
-			apiURL = formData.getString("apiURL");
-			user = formData.getString("user");
-			password = formData.getString("password");
+			apiURL = Secret.fromString(formData.getString("apiURL"));
+			user = Secret.fromString(formData.getString("user"));
+			password = Secret.fromString(formData.getString("password"));
 			version = formData.getString("version");
 			try {
 				timeout = formData.getInt("timeout");
@@ -309,15 +311,15 @@ public class AquaDockerScannerBuilder extends Builder implements SimpleBuildStep
 		}
 
 		public String getApiURL() {
-			return apiURL;
+			return Secret.toString(apiURL);
 		}
 
 		public String getUser() {
-			return user;
+			return Secret.toString(user);
 		}
 
 		public String getPassword() {
-			return password;
+			return Secret.toString(password);
 		}
 
 		public String getVersion() {
