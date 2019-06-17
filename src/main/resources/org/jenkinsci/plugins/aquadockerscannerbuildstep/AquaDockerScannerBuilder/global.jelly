@@ -9,7 +9,7 @@
    </f:block>
    <f:radioBlock checked="${instance.isVersion('2.x')}" name="version" value="2.x" title="Version 2.x" inline="true">
    </f:radioBlock>
-   <f:radioBlock checked="${instance.isVersion('3.x') or true}" name="version" value="3.x" title="Version 3.x" inline="true">
+   <f:radioBlock checked="${instance.isVersion('3.x') or true}" name="version" value="3.x" title="Version 3.x and above" inline="true">
    </f:radioBlock>
     <f:entry title="Aqua scanner image" field="aquaScannerImage">
       <f:textbox />
