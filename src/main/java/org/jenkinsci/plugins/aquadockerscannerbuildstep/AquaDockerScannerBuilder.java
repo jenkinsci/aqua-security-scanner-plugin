@@ -160,13 +160,13 @@ public class AquaDockerScannerBuilder extends Builder implements SimpleBuildStep
 		String aquaScannerImage = getDescriptor().getAquaScannerImage();
 		String apiURL = getDescriptor().getApiURL();
 		String user = getDescriptor().getUser();
-		String password = getDescriptor().getPassword();
+		Secret password = getDescriptor().getPassword();
 		String version = getDescriptor().getVersion();
 		int timeout = getDescriptor().getTimeout();
 		String runOptions = getDescriptor().getRunOptions();
 		boolean caCertificates = getDescriptor().getCaCertificates();
 		if (apiURL == null || apiURL.trim().equals("") || user == null || user.trim().equals("") || password == null
-				|| password.trim().equals("")) {
+				|| Secret.toString(password).trim().equals("")) {
 				throw new AbortException("Missing configuration. Please set the global configuration parameters in The \"Aqua Security\" section under  \"Manage Jenkins/Configure System\", before continuing.\n");
 		}
 
@@ -318,8 +318,8 @@ public class AquaDockerScannerBuilder extends Builder implements SimpleBuildStep
 			return Secret.toString(user);
 		}
 
-		public String getPassword() {
-			return Secret.toString(password);
+		public Secret getPassword() {
+			return password;
 		}
 
 		public String getVersion() {
