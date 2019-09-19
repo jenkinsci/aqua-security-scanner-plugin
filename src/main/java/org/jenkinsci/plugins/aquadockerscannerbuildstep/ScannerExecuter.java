@@ -13,6 +13,7 @@ import java.io.PrintStream;
 import hudson.FilePath;
 import hudson.model.Run;
 import hudson.model.TaskListener;
+import hudson.util.Secret;
 
 /**
  * This class does the actual execution..
@@ -22,7 +23,7 @@ import hudson.model.TaskListener;
 public class ScannerExecuter {
 
 	public static int execute(Run<?, ?> build, FilePath workspace, Launcher launcher, TaskListener listener, String artifactName,
-			String aquaScannerImage, String apiURL, String user, String password, String version, int timeout,
+			String aquaScannerImage, String apiURL, String user, Secret password, String version, int timeout,
 			String runOptions, String locationType, String localImage, String registry, boolean register, String hostedImage,
 			boolean hideBase, boolean showNegligible, boolean checkonly, String notCompliesCmd, boolean caCertificates, String policies, String customFlags) {
 
