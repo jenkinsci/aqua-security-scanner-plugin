@@ -1,18 +1,13 @@
-| Plugin Information                                                                                                                      |
-|-----------------------------------------------------------------------------------------------------------------------------------------|
-| View Aqua Security Scanner [on the plugin site](https://plugins.jenkins.io/aqua-security-scanner){.external-link} for more information. |
-
-
 # Description
 
 Adds a Build Step for scanning Docker images, local or hosted on
 registries, for security vulnerabilities, using the API provided by
-[Aqua Security](https://www.aquasec.com){.external-link}.
+[Aqua Security](https://www.aquasec.com)
 
 ## Changelog:
 
 
-#### **Version 3.0.20 (Oct 29 19, 2019)**
+#### **Version 3.0.21 (Oct 29 19, 2019)**
 
 -   Migrate to GitHub docs
 
