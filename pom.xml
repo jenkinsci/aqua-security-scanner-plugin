@@ -29,8 +29,8 @@
 
   <name>Aqua Security Scanner</name>
   <description>Scans Docker images for vulnerabilities</description>
-  <url>https://github.com/jenkinsci/aqua-security-scanner-plugin/version.md</url>
-
+  <url>https://github.com/jenkinsci/aqua-security-scanner-plugin/blob/master/version.md</url>
+ 
   <licenses>
     <license>
       <name>Apache License, Version 2.0</name>
