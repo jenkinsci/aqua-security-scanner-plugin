@@ -241,7 +241,7 @@ public class AquaDockerScannerBuilder extends Builder implements SimpleBuildStep
 		 * To persist global configuration information, simply store it in a field and
 		 * call save().
 		 */
-		private String aquaScannerImage = "registry.aquasec.com/scanner:4.2"; // Default value
+		private String aquaScannerImage;
 		private Secret apiURL;
 		private Secret user;
 		private Secret password;
