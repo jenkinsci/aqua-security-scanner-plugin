@@ -29,7 +29,7 @@
 
   <name>Aqua Security Scanner</name>
   <description>Scans Docker images for vulnerabilities</description>
-  <url>https://wiki.jenkins-ci.org/display/JENKINS/Aqua+Security+Scanner+Plugin</url>
+  <url>https://github.com/jenkinsci/aqua-security-scanner-plugin/version.md</url>
 
   <licenses>
     <license>
