@@ -103,6 +103,21 @@
     <tag>aqua-security-scanner-3.0.2</tag>
   </scm>
 
+  <build>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>findbugs-maven-plugin</artifactId>
+          <version>3.0.4</version>
+          <configuration>
+            <failOnError>${maven.findbugs.failure.strict}</failOnError>
+          </configuration>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+  </build>
+
   <distributionManagement>
     <repository>
       <id>maven.jenkins-ci.org</id>
