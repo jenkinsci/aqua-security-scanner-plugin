@@ -25,6 +25,8 @@
          ~ hpi-plugin.version: The HPI Maven Plugin version used by the plugin..
          ~ stapler-plugin.version: The Stapler Maven plugin version required by the plugin.
     -->
+    <maven.compiler.source>1.7</maven.compiler.source>
+    <maven.compiler.target>1.7</maven.compiler.target>
   </properties>
 
   <name>Aqua Security Scanner</name>
@@ -131,14 +133,6 @@
 
   <repositories>
     <repository>
-      <id>repo.jenkins-ci.org</id>
-      <url>https://repo.jenkins-ci.org/public/</url>
-    </repository>
-  </repositories>
-  <pluginRepositories>
-    <pluginRepository>
-      <id>repo.jenkins-ci.org</id>
-      <url>https://repo.jenkins-ci.org/public/</url>
     </pluginRepository>
   </pluginRepositories>
 
