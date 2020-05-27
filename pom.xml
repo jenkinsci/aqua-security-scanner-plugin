@@ -25,6 +25,8 @@
          ~ hpi-plugin.version: The HPI Maven Plugin version used by the plugin..
          ~ stapler-plugin.version: The Stapler Maven plugin version required by the plugin.
     -->
+    <maven.compiler.source>1.7</maven.compiler.source>
+    <maven.compiler.target>1.7</maven.compiler.target>
   </properties>
 
   <name>Aqua Security Scanner</name>
@@ -102,6 +104,21 @@
     <url>http://github.com/jenkinsci/${project.artifactId}-plugin</url>
     <tag>aqua-security-scanner-3.0.2</tag>
   </scm>
+
+  <build>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>findbugs-maven-plugin</artifactId>
+          <version>3.0.4</version>
+          <configuration>
+            <failOnError>${maven.findbugs.failure.strict}</failOnError>
+          </configuration>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+  </build>
 
   <distributionManagement>
     <repository>

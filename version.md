@@ -7,6 +7,10 @@ registries, for security vulnerabilities, using the API provided by
 ## Changelog:
 
 
+#### **Version 3.0.22 (May 26, 2020)**
+
+-   Adding support for DTA scan results.
+
 #### **Version 3.0.21 (Oct 29 19, 2019)**
 
 -   Migrate to GitHub docs
