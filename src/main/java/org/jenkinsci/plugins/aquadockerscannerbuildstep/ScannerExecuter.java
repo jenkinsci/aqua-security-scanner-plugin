@@ -166,6 +166,8 @@ public class ScannerExecuter {
 		listener.getLogger().println(scanOutput.substring(0,htmlStart));
 		int htmlEnd = scanOutput.lastIndexOf("</html>") + 7;
 		scanOutput = scanOutput.substring(htmlStart,htmlEnd);
+		String scanRegex = "(?m)\\d{4}\\-(0?[1-9]|1[012])\\-(0?[1-9]|[12][0-9]|3[01]).*";
+		scanOutput = scanOutput.replaceAll(scanRegex, "");
 		try
 		{
 			target.write(scanOutput, "UTF-8");
