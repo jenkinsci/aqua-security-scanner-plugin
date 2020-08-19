@@ -18,6 +18,7 @@ import org.kohsuke.stapler.QueryParameter;
 
 import javax.servlet.ServletException;
 import java.io.IOException;
+import java.util.UUID;
 
 import hudson.FilePath;
 import hudson.model.Run;
@@ -178,16 +179,17 @@ public class AquaDockerScannerBuilder extends Builder implements SimpleBuildStep
 		// Support unique names for artifacts when there are multiple steps in the same
 		// build
 		String artifactSuffix, artifactName;
+		String randomFileString = UUID.randomUUID().toString().replaceAll("-", "");
 		if (build.hashCode() != buildId) {
 			// New build
 			setBuildId(build.hashCode());
 			setCount(1);
-			artifactSuffix = null; // When ther is only one step, there should be no suffix at all
-			artifactName = "scanout.html";
+			artifactSuffix = null; // When there is only one step, there should be no suffix at all
+			artifactName = String.format("scanout-%s.html", randomFileString);
 		} else {
 			setCount(count + 1);
 			artifactSuffix = Integer.toString(count);
-			artifactName = "scanout-" + artifactSuffix + ".html";
+			artifactName = String.format("scanout-%s-%s.html", artifactSuffix, randomFileString);
 		}
 
 		int exitCode = ScannerExecuter.execute(build, workspace,launcher, listener, artifactName, aquaScannerImage, apiURL, user,
