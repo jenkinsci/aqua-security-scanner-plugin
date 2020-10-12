@@ -49,6 +49,7 @@ public class AquaDockerScannerBuilder extends Builder implements SimpleBuildStep
 	private final boolean showNegligible;
 	private final String policies;
 	private final String customFlags;
+	private final String tarFilePath;
 
 	private static int count;
 	private static int buildId = 0;
@@ -65,7 +66,8 @@ public class AquaDockerScannerBuilder extends Builder implements SimpleBuildStep
 	// "DataBoundConstructor"
 	@DataBoundConstructor
 	public AquaDockerScannerBuilder(String locationType, String registry, boolean register, String localImage, String hostedImage,
-			String onDisallowed, String notCompliesCmd,  boolean hideBase, boolean showNegligible, String policies, String customFlags) {
+			String onDisallowed, String notCompliesCmd,  boolean hideBase, boolean showNegligible, String policies,
+			String customFlags,	String tarFilePath) {
 		this.locationType = locationType;
 		this.registry = registry;
 		this.register = register;
@@ -77,6 +79,7 @@ public class AquaDockerScannerBuilder extends Builder implements SimpleBuildStep
 		this.showNegligible = showNegligible;
 		this.policies = policies;
 		this.customFlags = customFlags;
+		this.tarFilePath = tarFilePath;
 	}
 
 	/**
@@ -131,6 +134,8 @@ public class AquaDockerScannerBuilder extends Builder implements SimpleBuildStep
 		return showNegligible;
 	}
 
+	public String getTarFilePath() { return tarFilePath; }
+
 	// Returns the 'checked' state of the radio button for the step GUI
 	public String isLocationType(String type) {
 		if (this.locationType == null) {
@@ -150,7 +155,6 @@ public class AquaDockerScannerBuilder extends Builder implements SimpleBuildStep
 			return this.onDisallowed.equals(state) ? "true" : "false";
 		}
 	}
-
 
 	@Override
 	public void perform(Run<?, ?> build, FilePath workspace, Launcher launcher, TaskListener listener)
@@ -192,7 +196,8 @@ public class AquaDockerScannerBuilder extends Builder implements SimpleBuildStep
 
 		int exitCode = ScannerExecuter.execute(build, workspace,launcher, listener, artifactName, aquaScannerImage, apiURL, user,
 				password, version, timeout, runOptions, locationType, localImage, registry, register, hostedImage, hideBase,
-				showNegligible, onDisallowed == null || !onDisallowed.equals("fail"), notCompliesCmd, caCertificates, policies, customFlags);
+				showNegligible, onDisallowed == null || !onDisallowed.equals("fail"), notCompliesCmd, caCertificates,
+				policies, customFlags, tarFilePath);
 		build.addAction(new AquaScannerAction(build, artifactSuffix, artifactName));
 
 		archiveArtifacts(build, workspace, launcher, listener);
