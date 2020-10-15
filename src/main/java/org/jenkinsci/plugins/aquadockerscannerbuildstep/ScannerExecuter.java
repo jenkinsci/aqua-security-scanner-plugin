@@ -1,9 +1,7 @@
 package org.jenkinsci.plugins.aquadockerscannerbuildstep;
 
-import hudson.Launcher;
-import hudson.EnvVars;
+import hudson.*;
 import hudson.Launcher.ProcStarter;
-import hudson.FilePath;
 import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
 import hudson.util.ArgumentListBuilder;
@@ -40,11 +38,6 @@ public class ScannerExecuter {
 			registry = env.expand(registry);
 			hostedImage = env.expand(hostedImage);
 			tarFilePath = env.expand(tarFilePath);
-
-			// extract file name from path for scan tagging
-			Path path = Paths.get(tarFilePath);
-			Path fileName = path.getFileName();
-			String imgName = fileName.toString().split("\\.")[0];
 
 			ArgumentListBuilder args = new ArgumentListBuilder();
 			args.add("docker", "run");
@@ -91,6 +84,14 @@ public class ScannerExecuter {
 			case "dockerarchive":
 				args.addTokenized(runOptions);
 				if (version.trim().equals("3.x")) {
+
+					// extract file name from path for scan tagging
+					Path path = Paths.get(tarFilePath);
+					Path fileName = path.getFileName();
+					if (fileName == null)
+						throw new AbortException("can not extract the file name \n");
+					String imgName = fileName.toString().split("\\.")[0];
+
 					args.add("--rm", "-v", tarFilePath+":"+tarFilePath, aquaScannerImage, "scan", imgName+":tar", "--host", apiURL, "--docker-archive", tarFilePath);
 				}
 				break;
