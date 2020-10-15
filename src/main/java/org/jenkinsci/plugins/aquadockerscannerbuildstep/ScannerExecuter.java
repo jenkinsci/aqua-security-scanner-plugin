@@ -15,6 +15,9 @@ import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.util.Secret;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
 /**
  * This class does the actual execution..
  *
@@ -25,7 +28,8 @@ public class ScannerExecuter {
 	public static int execute(Run<?, ?> build, FilePath workspace, Launcher launcher, TaskListener listener, String artifactName,
 			String aquaScannerImage, String apiURL, String user, Secret password, String version, int timeout,
 			String runOptions, String locationType, String localImage, String registry, boolean register, String hostedImage,
-			boolean hideBase, boolean showNegligible, boolean checkonly, String notCompliesCmd, boolean caCertificates, String policies, String customFlags) {
+			boolean hideBase, boolean showNegligible, boolean checkonly, String notCompliesCmd, boolean caCertificates,
+			String policies, String customFlags, String tarFilePath) {
 
 		PrintStream print_stream = null;
 		try {
@@ -35,6 +39,12 @@ public class ScannerExecuter {
 			localImage = env.expand(localImage);
 			registry = env.expand(registry);
 			hostedImage = env.expand(hostedImage);
+			tarFilePath = env.expand(tarFilePath);
+
+			// extract file name from path for scan tagging
+			Path path = Paths.get(tarFilePath);
+			Path fileName = path.getFileName();
+			String imgName = fileName.toString().split("\\.")[0];
 
 			ArgumentListBuilder args = new ArgumentListBuilder();
 			args.add("docker", "run");
@@ -76,6 +86,12 @@ public class ScannerExecuter {
 				if (register) {
 					args.add("--registry", registry);
 					args.add("--register");
+				}
+				break;
+			case "dockerarchive":
+				args.addTokenized(runOptions);
+				if (version.trim().equals("3.x")) {
+					args.add("--rm", "-v", tarFilePath+":"+tarFilePath, aquaScannerImage, "scan", imgName+":tar", "--host", apiURL, "--docker-archive", tarFilePath);
 				}
 				break;
 			default:
