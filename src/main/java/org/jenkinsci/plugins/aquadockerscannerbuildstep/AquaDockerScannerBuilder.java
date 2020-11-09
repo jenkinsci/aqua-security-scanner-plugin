@@ -1,9 +1,7 @@
 package org.jenkinsci.plugins.aquadockerscannerbuildstep;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import hudson.AbortException;
-import hudson.Launcher;
-import hudson.Extension;
+import hudson.*;
 import hudson.util.FormValidation;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
@@ -13,13 +11,14 @@ import hudson.tasks.ArtifactArchiver;
 import hudson.tasks.BuildStepDescriptor;
 import net.sf.json.JSONObject;
 import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.QueryParameter;
 
+import javax.annotation.CheckForNull;
 import javax.servlet.ServletException;
 import java.io.IOException;
 
-import hudson.FilePath;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import jenkins.tasks.SimpleBuildStep;
@@ -49,7 +48,9 @@ public class AquaDockerScannerBuilder extends Builder implements SimpleBuildStep
 	private final boolean showNegligible;
 	private final String policies;
 	private final String customFlags;
-	private final String tarFilePath;
+
+	@CheckForNull
+	private String tarFilePath;
 
 	private static int count;
 	private static int buildId = 0;
@@ -134,6 +135,7 @@ public class AquaDockerScannerBuilder extends Builder implements SimpleBuildStep
 		return showNegligible;
 	}
 
+	@CheckForNull
 	public String getTarFilePath() { return tarFilePath; }
 
 	// Returns the 'checked' state of the radio button for the step GUI
@@ -154,6 +156,11 @@ public class AquaDockerScannerBuilder extends Builder implements SimpleBuildStep
 		} else {
 			return this.onDisallowed.equals(state) ? "true" : "false";
 		}
+	}
+
+	@DataBoundSetter
+	public void setTatFilePath(@CheckForNull String tarFilePath) {
+		this.tarFilePath = Util.fixNull(tarFilePath);
 	}
 
 	@Override
