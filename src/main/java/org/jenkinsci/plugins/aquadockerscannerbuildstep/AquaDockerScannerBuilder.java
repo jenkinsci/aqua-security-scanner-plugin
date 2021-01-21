@@ -159,7 +159,7 @@ public class AquaDockerScannerBuilder extends Builder implements SimpleBuildStep
 	}
 
 	@DataBoundSetter
-	public void setTatFilePath(@CheckForNull String tarFilePath) {
+	public void setTarFilePath(@CheckForNull String tarFilePath) {
 		this.tarFilePath = Util.fixNull(tarFilePath);
 	}
 
