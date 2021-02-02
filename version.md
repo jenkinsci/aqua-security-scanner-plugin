@@ -6,6 +6,10 @@ registries, for security vulnerabilities, using the API provided by
 
 ## Changelog:
 
+#### **Version 3.0.22 (May 26, 2020)**
+
+-   Adding docker archive support for scanning tar files.
+-   Fix issue with scanner report has random string
 
 #### **Version 3.0.23 (Nov 13, 2020)**
 
