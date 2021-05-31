@@ -6,15 +6,20 @@ registries, for security vulnerabilities, using the API provided by
 
 ## Changelog:
 
-#### **Version 3.0.22 (May 26, 2020)**
+#### **Version 3.0.25 (May 31, 2021)**
+
+-   Updates for cloudbees
+-   Fix issue with css for cloudbees
+
+#### **Version 3.0.24 (Jan 21, 2021)**
+
+-   Update css static file
+-   Fix issue with stappler logging error
+
+#### **Version 3.0.23 (Nov 17, 2020)**
 
 -   Adding docker archive support for scanning tar files.
 -   Fix issue with scanner report has random string
-
-#### **Version 3.0.23 (Nov 13, 2020)**
-
--   Adding docker archive support for scanning tar files.
--   fix issue with random characters in scanner report
 
 #### **Version 3.0.22 (May 26, 2020)**
 

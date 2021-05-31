@@ -12,6 +12,7 @@ import hudson.FilePath;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.util.Secret;
+import jenkins.model.Jenkins;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -137,8 +138,12 @@ public class ScannerExecuter {
 			outFilePath.copyTo(target);
 
 			//css
+			File cssFile;
 			FilePath targetCss = new FilePath(workspace, "styles.css");
-			File cssFile = new File(env.get("JENKINS_HOME") + "/plugins/aqua-security-scanner/css/", "styles.css");
+			if(Jenkins.get().getPluginManager().getWorkDir() != null)
+				cssFile = new File(Jenkins.get().getPluginManager().getWorkDir() + "/aqua-security-scanner/css/", "styles.css");
+			else
+				cssFile = new File(env.get("JENKINS_HOME") + "/plugins/aqua-security-scanner/css/", "styles.css");
 			FilePath cssFilePath = new FilePath(cssFile);
 			cssFilePath.copyTo(targetCss);
 
