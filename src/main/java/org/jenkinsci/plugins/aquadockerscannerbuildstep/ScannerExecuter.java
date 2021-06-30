@@ -28,7 +28,7 @@ public class ScannerExecuter {
 			String aquaScannerImage, String apiURL, String user, Secret password, String version, int timeout,
 			String runOptions, String locationType, String localImage, String registry, boolean register, String hostedImage,
 			boolean hideBase, boolean showNegligible, boolean checkonly, String notCompliesCmd, boolean caCertificates,
-			String policies, String customFlags, String tarFilePath) {
+			String policies, String customFlags, String tarFilePath, String containerRuntime, String scannerPath) {
 
 		PrintStream print_stream = null;
 		try {
@@ -41,7 +41,13 @@ public class ScannerExecuter {
 			tarFilePath = env.expand(tarFilePath);
 
 			ArgumentListBuilder args = new ArgumentListBuilder();
-			args.add("docker", "run");
+
+			if(containerRuntime.equals("")) {
+				containerRuntime = "docker";
+			}
+			args.add(containerRuntime);
+			args.add("run");
+
 			String buildJobName = env.get("JOB_NAME").trim();
 			buildJobName = buildJobName.replaceAll("\\s+", "");
 			String buildUrl = env.get("BUILD_URL");
@@ -71,11 +77,23 @@ public class ScannerExecuter {
 				}
 				break;
 			case "local":
+				if(!scannerPath.equals("") && !containerRuntime.equals("docker")) {
+					args.add("-v", scannerPath+":/aquasec/scannercli:Z", "--entrypoint=/aquasec/scannercli");
+				}
 				args.addTokenized(runOptions);
 				if (version.trim().equals("2.x")) {
-					args.add("--rm", "-v", "/var/run/docker.sock:/var/run/docker.sock", aquaScannerImage, "--host", apiURL, "--local", "--image", localImage);
+					if(containerRuntime.equals("docker")){
+						args.add("--rm", "-v", "/var/run/docker.sock:/var/run/docker.sock", aquaScannerImage, "--host", apiURL, "--local", "--image", localImage);
+					} else {
+						args.add("--rm", "-u", "root", localImage,"--host", apiURL, "--image");						
+					}
+					
 				} else if (version.trim().equals("3.x")) {
-					args.add("--rm", "-v", "/var/run/docker.sock:/var/run/docker.sock", aquaScannerImage, "scan", "--host", apiURL, "--local", localImage);
+					if(containerRuntime.equals("docker")){
+						args.add("--rm", "-v", "/var/run/docker.sock:/var/run/docker.sock", aquaScannerImage, "scan", "--host", apiURL, "--local", localImage);	
+					} else {
+						args.add("--rm", "-u", "root", localImage, "scan", "--host", apiURL);
+					}	
 				}
 				if (register) {
 					args.add("--registry", registry);
@@ -118,6 +136,10 @@ public class ScannerExecuter {
 
 			args.add("--html", "--user", user, "--password");
 			args.addMasked(password);
+
+			if (!containerRuntime.equals("docker")){
+				args.add("--code-scan", "/");
+			}
 
 			File outFile = new File(build.getRootDir(), "out");
 			Launcher.ProcStarter ps = launcher.launch();
