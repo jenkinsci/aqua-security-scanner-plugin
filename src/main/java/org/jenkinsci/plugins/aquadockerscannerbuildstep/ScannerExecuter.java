@@ -138,7 +138,8 @@ public class ScannerExecuter {
 			args.addMasked(password);
 
 			if (!containerRuntime.equals("docker")){
-				args.add("--code-scan", "/");
+				args.add("--image-name", localImage);
+				args.add("--fs-scan", "/");
 			}
 
 			File outFile = new File(build.getRootDir(), "out");
