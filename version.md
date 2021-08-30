@@ -6,6 +6,10 @@ registries, for security vulnerabilities, using the API provided by
 
 ## Changelog:
 
+#### **Version 3.1.0 (Aug 30, 2021)**
+
+-   Added custom container runtime scanning support
+
 #### **Version 3.0.25 (May 31, 2021)**
 
 -   Updates for cloudbees
