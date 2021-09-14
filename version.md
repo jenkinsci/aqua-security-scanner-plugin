@@ -6,6 +6,10 @@ registries, for security vulnerabilities, using the API provided by
 
 ## Changelog:
 
+#### **Version 3.1.1 (Aug 30, 2021)**
+
+-   Reverted the container runtime support added in 3.1.0 due to backward compatibility support.
+
 #### **Version 3.1.0 (Aug 30, 2021)**
 
 -   Added custom container runtime scanning support
