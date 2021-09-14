@@ -10,6 +10,10 @@ registries, for security vulnerabilities, using the API provided by
 
 -   Added custom container runtime scanning support
 
+>Note: Please add empty values("") for following parameters in pipeline 
+>1. containerRuntime 
+>2. scannerPath
+
 #### **Version 3.0.25 (May 31, 2021)**
 
 -   Updates for cloudbees
