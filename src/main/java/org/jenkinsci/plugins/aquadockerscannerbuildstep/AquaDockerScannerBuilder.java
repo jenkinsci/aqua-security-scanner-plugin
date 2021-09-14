@@ -48,8 +48,6 @@ public class AquaDockerScannerBuilder extends Builder implements SimpleBuildStep
 	private final boolean showNegligible;
 	private final String policies;
 	private final String customFlags;
-	private final String containerRuntime;
-	private final String scannerPath;
 
 	@CheckForNull
 	private String tarFilePath;
@@ -70,7 +68,7 @@ public class AquaDockerScannerBuilder extends Builder implements SimpleBuildStep
 	@DataBoundConstructor
 	public AquaDockerScannerBuilder(String locationType, String registry, boolean register, String localImage, String hostedImage,
 			String onDisallowed, String notCompliesCmd,  boolean hideBase, boolean showNegligible, String policies,
-			String customFlags,	String tarFilePath, String containerRuntime, String scannerPath) {
+			String customFlags,	String tarFilePath) {
 		this.locationType = locationType;
 		this.registry = registry;
 		this.register = register;
@@ -83,8 +81,6 @@ public class AquaDockerScannerBuilder extends Builder implements SimpleBuildStep
 		this.policies = policies;
 		this.customFlags = customFlags;
 		this.tarFilePath = tarFilePath;
-		this.containerRuntime = containerRuntime;
-		this.scannerPath = scannerPath;
 	}
 
 	/**
@@ -93,14 +89,6 @@ public class AquaDockerScannerBuilder extends Builder implements SimpleBuildStep
 	 */
 	public String getLocationType() {
 		return locationType;
-	}
-
-	public String getContainerRuntime() {
-		return containerRuntime;
-	}
-
-	public String getScannerPath() {
-		return scannerPath;
 	}
 
 	public String getRegistry() {
@@ -216,7 +204,7 @@ public class AquaDockerScannerBuilder extends Builder implements SimpleBuildStep
 		int exitCode = ScannerExecuter.execute(build, workspace,launcher, listener, artifactName, aquaScannerImage, apiURL, user,
 				password, version, timeout, runOptions, locationType, localImage, registry, register, hostedImage, hideBase,
 				showNegligible, onDisallowed == null || !onDisallowed.equals("fail"), notCompliesCmd, caCertificates,
-				policies, customFlags, tarFilePath, containerRuntime, scannerPath);
+				policies, customFlags, tarFilePath);
 		build.addAction(new AquaScannerAction(build, artifactSuffix, artifactName));
 
 		archiveArtifacts(build, workspace, launcher, listener);

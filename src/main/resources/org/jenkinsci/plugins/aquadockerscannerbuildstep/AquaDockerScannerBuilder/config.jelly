@@ -24,12 +24,6 @@
     <f:entry title="Image name" field="localImage">
 	<f:textbox />
       </f:entry>
-    <f:entry title="Container Runtime" field="containerRuntime" help="/plugin/aqua-security-scanner/help-containerRuntime.html">
-      <f:textbox default="docker" /> 
-    </f:entry>
-    <f:entry title="Aqua Scanner path" field="scannerPath">
-      <f:textbox default="" />
-    </f:entry>
    </f:radioBlock>
    <f:radioBlock checked="${instance.isLocationType('hosted')}" name="locationType" value="hosted" title="Hosted image" inline="true" help="/plugin/aqua-security-scanner/help-isHosted.html">
       <f:entry title="Image name" field="hostedImage">
@@ -59,4 +53,5 @@
    <f:entry title="Custom flags" field="customFlags">
     <f:textbox />
    </f:entry>
+
 </j:jelly>
