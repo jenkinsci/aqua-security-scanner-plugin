@@ -48,8 +48,12 @@ public class AquaDockerScannerBuilder extends Builder implements SimpleBuildStep
 	private final boolean showNegligible;
 	private final String policies;
 	private final String customFlags;
-	private final String containerRuntime;
-	private final String scannerPath;
+
+	@CheckForNull
+	private String containerRuntime;
+
+	@CheckForNull
+	private String scannerPath;
 
 	@CheckForNull
 	private String tarFilePath;
@@ -95,10 +99,12 @@ public class AquaDockerScannerBuilder extends Builder implements SimpleBuildStep
 		return locationType;
 	}
 
+	@CheckForNull
 	public String getContainerRuntime() {
 		return containerRuntime;
 	}
 
+	@CheckForNull
 	public String getScannerPath() {
 		return scannerPath;
 	}
@@ -168,6 +174,16 @@ public class AquaDockerScannerBuilder extends Builder implements SimpleBuildStep
 		} else {
 			return this.onDisallowed.equals(state) ? "true" : "false";
 		}
+	}
+
+	@DataBoundSetter
+	public void setContainerRuntime(@CheckForNull String containerRuntime) {
+		this.containerRuntime = Util.fixNull(containerRuntime, "docker");
+	}
+
+	@DataBoundSetter
+	public void setScannerPath(@CheckForNull String scannerPath) {
+		this.scannerPath = Util.fixNull(scannerPath);
 	}
 
 	@DataBoundSetter

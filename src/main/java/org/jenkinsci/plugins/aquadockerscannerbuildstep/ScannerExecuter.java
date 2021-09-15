@@ -42,8 +42,15 @@ public class ScannerExecuter {
 
 			ArgumentListBuilder args = new ArgumentListBuilder();
 
+			if(containerRuntime == null){
+				containerRuntime = "";
+			}
+			if(scannerPath == null){
+				scannerPath = "";
+			}
+
 			boolean isDocker = false;
-			if(containerRuntime.equals("")) {
+			if("".equals(containerRuntime) || "docker".equals(containerRuntime)) {
 				containerRuntime = "docker";
 				isDocker = true;
 			}
@@ -79,7 +86,7 @@ public class ScannerExecuter {
 				}
 				break;
 			case "local":
-				if(!scannerPath.equals("") && !isDocker) {
+				if(!"".equals(scannerPath) && !isDocker) {
 					args.add("-v", scannerPath+":/aquasec/scannercli:Z", "--entrypoint=/aquasec/scannercli");
 				}
 				args.addTokenized(runOptions);
