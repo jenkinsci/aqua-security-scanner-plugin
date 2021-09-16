@@ -50,6 +50,12 @@ public class AquaDockerScannerBuilder extends Builder implements SimpleBuildStep
 	private final String customFlags;
 
 	@CheckForNull
+	private String containerRuntime;
+
+	@CheckForNull
+	private String scannerPath;
+
+	@CheckForNull
 	private String tarFilePath;
 
 	private static int count;
@@ -68,7 +74,7 @@ public class AquaDockerScannerBuilder extends Builder implements SimpleBuildStep
 	@DataBoundConstructor
 	public AquaDockerScannerBuilder(String locationType, String registry, boolean register, String localImage, String hostedImage,
 			String onDisallowed, String notCompliesCmd,  boolean hideBase, boolean showNegligible, String policies,
-			String customFlags,	String tarFilePath) {
+			String customFlags,	String tarFilePath, String containerRuntime, String scannerPath) {
 		this.locationType = locationType;
 		this.registry = registry;
 		this.register = register;
@@ -81,6 +87,8 @@ public class AquaDockerScannerBuilder extends Builder implements SimpleBuildStep
 		this.policies = policies;
 		this.customFlags = customFlags;
 		this.tarFilePath = tarFilePath;
+		this.containerRuntime = containerRuntime;
+		this.scannerPath = scannerPath;
 	}
 
 	/**
@@ -89,6 +97,16 @@ public class AquaDockerScannerBuilder extends Builder implements SimpleBuildStep
 	 */
 	public String getLocationType() {
 		return locationType;
+	}
+
+	@CheckForNull
+	public String getContainerRuntime() {
+		return containerRuntime;
+	}
+
+	@CheckForNull
+	public String getScannerPath() {
+		return scannerPath;
 	}
 
 	public String getRegistry() {
@@ -159,6 +177,16 @@ public class AquaDockerScannerBuilder extends Builder implements SimpleBuildStep
 	}
 
 	@DataBoundSetter
+	public void setContainerRuntime(@CheckForNull String containerRuntime) {
+		this.containerRuntime = Util.fixNull(containerRuntime, "docker");
+	}
+
+	@DataBoundSetter
+	public void setScannerPath(@CheckForNull String scannerPath) {
+		this.scannerPath = Util.fixNull(scannerPath);
+	}
+
+	@DataBoundSetter
 	public void setTarFilePath(@CheckForNull String tarFilePath) {
 		this.tarFilePath = Util.fixNull(tarFilePath);
 	}
@@ -204,7 +232,7 @@ public class AquaDockerScannerBuilder extends Builder implements SimpleBuildStep
 		int exitCode = ScannerExecuter.execute(build, workspace,launcher, listener, artifactName, aquaScannerImage, apiURL, user,
 				password, version, timeout, runOptions, locationType, localImage, registry, register, hostedImage, hideBase,
 				showNegligible, onDisallowed == null || !onDisallowed.equals("fail"), notCompliesCmd, caCertificates,
-				policies, customFlags, tarFilePath);
+				policies, customFlags, tarFilePath, containerRuntime, scannerPath);
 		build.addAction(new AquaScannerAction(build, artifactSuffix, artifactName));
 
 		archiveArtifacts(build, workspace, launcher, listener);
