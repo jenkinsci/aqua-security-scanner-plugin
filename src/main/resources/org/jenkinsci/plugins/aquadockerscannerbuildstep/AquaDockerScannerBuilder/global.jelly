@@ -23,6 +23,9 @@
     <f:entry title="Password" field="password">
       <f:password />
     </f:entry>
+    <f:entry title="Token" field="token">
+      <f:password />
+    </f:entry>
     <f:entry title="Timeout" field="timeout">
       <f:textbox />
     </f:entry>

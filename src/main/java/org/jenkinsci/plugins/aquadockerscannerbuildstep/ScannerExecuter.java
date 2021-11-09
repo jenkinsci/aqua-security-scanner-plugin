@@ -25,7 +25,7 @@ import java.nio.file.Paths;
 public class ScannerExecuter {
 
 	public static int execute(Run<?, ?> build, FilePath workspace, Launcher launcher, TaskListener listener, String artifactName,
-			String aquaScannerImage, String apiURL, String user, Secret password, String version, int timeout,
+			String aquaScannerImage, String apiURL, String user, Secret password, Secret token, String version, int timeout,
 			String runOptions, String locationType, String localImage, String registry, boolean register, String hostedImage,
 			boolean hideBase, boolean showNegligible, boolean checkonly, String notCompliesCmd, boolean caCertificates,
 			String policies, String customFlags, String tarFilePath, String containerRuntime, String scannerPath) {
@@ -143,8 +143,18 @@ public class ScannerExecuter {
 				args.addTokenized(customFlags);
 			}
 
-			args.add("--html", "--user", user, "--password");
-			args.addMasked(password);
+			args.add("--html");
+
+			// Authentication, local token is priority
+			if (customFlags != null && !customFlags.contains("--token")) {
+				if("aqua".equals(user) && Secret.fromString("aqua").equals(password)) {
+					args.add("--token");
+					args.addMasked(token);
+				} else {
+					args.add("--user", user, "--password");
+					args.addMasked(password);
+				}
+			}
 
 			if (!isDocker){
 				args.add("--image-name", localImage);

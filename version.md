@@ -6,6 +6,10 @@ registries, for security vulnerabilities, using the API provided by
 
 ## Changelog:
 
+#### **Version 3.1.3 (Nov 11, 2021)**
+
+-   Added support of aqua scanner token for authentication.
+
 #### **Version 3.1.2 (Sept 16, 2021)**
 
 -   Added custom container runtime scanning support with following optional fields:
