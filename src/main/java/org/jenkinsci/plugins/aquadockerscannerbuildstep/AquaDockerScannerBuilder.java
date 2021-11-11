@@ -200,6 +200,19 @@ public class AquaDockerScannerBuilder extends Builder implements SimpleBuildStep
 		String apiURL = getDescriptor().getApiURL();
 		String user = getDescriptor().getUser();
 		Secret password = getDescriptor().getPassword();
+		Secret token = getDescriptor().getToken();
+
+		// If user and password is default, check if token is provided as global or local value
+		if("aqua".equals(user) && Secret.fromString("aqua").equals(password) && 
+			Secret.fromString("").equals(token) && customFlags != null && !customFlags.contains("--token")){
+				throw new AbortException("Empty token values are not allowed for Default Aqua credentials.");
+			
+		}
+		
+		if(!Secret.fromString("").equals(token) && !("aqua".equals(user) && Secret.fromString("aqua").equals(password))){
+			listener.getLogger().println("Token provided will be ignored as authentication credentials are not Defaults.");
+		}
+
 		String version = getDescriptor().getVersion();
 		int timeout = getDescriptor().getTimeout();
 		String runOptions = getDescriptor().getRunOptions();
@@ -230,18 +243,18 @@ public class AquaDockerScannerBuilder extends Builder implements SimpleBuildStep
 		}
 
 		int exitCode = ScannerExecuter.execute(build, workspace,launcher, listener, artifactName, aquaScannerImage, apiURL, user,
-				password, version, timeout, runOptions, locationType, localImage, registry, register, hostedImage, hideBase,
+				password, token, version, timeout, runOptions, locationType, localImage, registry, register, hostedImage, hideBase,
 				showNegligible, onDisallowed == null || !onDisallowed.equals("fail"), notCompliesCmd, caCertificates,
 				policies, customFlags, tarFilePath, containerRuntime, scannerPath);
 		build.addAction(new AquaScannerAction(build, artifactSuffix, artifactName));
 
 		archiveArtifacts(build, workspace, launcher, listener);
 
-		System.out.println("exitCode: " + exitCode);
+		listener.getLogger().println("exitCode: " + exitCode);
 		String failedMessage = "Scanning failed.";
 		switch (exitCode) {
 		case OK_CODE:
-				System.out.println("Scanning success.");
+				listener.getLogger().println("Scanning success.");
 				break;
 		case DISALLOWED_CODE:
 				throw new AbortException(failedMessage);
@@ -295,6 +308,7 @@ public class AquaDockerScannerBuilder extends Builder implements SimpleBuildStep
 		private Secret apiURL;
 		private Secret user;
 		private Secret password;
+		private Secret token;
 		private String version;
 		private int timeout;
 		private String runOptions;
@@ -344,6 +358,7 @@ public class AquaDockerScannerBuilder extends Builder implements SimpleBuildStep
 			apiURL = Secret.fromString(formData.getString("apiURL"));
 			user = Secret.fromString(formData.getString("user"));
 			password = Secret.fromString(formData.getString("password"));
+			token = Secret.fromString(formData.getString("token"));
 			version = formData.getString("version");
 			try {
 				timeout = formData.getInt("timeout");
@@ -370,6 +385,10 @@ public class AquaDockerScannerBuilder extends Builder implements SimpleBuildStep
 
 		public Secret getPassword() {
 			return password;
+		}
+
+		public Secret getToken() {
+			return token;
 		}
 
 		public String getVersion() {
