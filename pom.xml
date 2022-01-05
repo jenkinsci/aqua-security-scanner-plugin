@@ -10,12 +10,12 @@
   </parent>
   <groupId>org.jenkins-ci.plugins</groupId>
   <artifactId>aqua-security-scanner</artifactId>
-  <version>3.1.3-SNAPSHOT</version>
+  <version>3.2.0-SNAPSHOT</version>
   <packaging>hpi</packaging>
 
   <properties>
     <!-- Baseline Jenkins version you use to build the plugin. Users must have this version or newer to run. -->
-    <jenkins.version>2.222.1</jenkins.version>
+    <jenkins.version>2.222.4</jenkins.version>
     <!-- Java Level to use. Java 7 required when using core >= 1.612 -->
     <java.level>8</java.level>
     <!-- Jenkins Test Harness version you use to test the plugin. -->
@@ -144,7 +144,7 @@
     <connection>scm:git:git://github.com/jenkinsci/${project.artifactId}-plugin.git</connection>
     <developerConnection>scm:git:git@github.com:jenkinsci/${project.artifactId}-plugin.git</developerConnection>
     <url>http://github.com/jenkinsci/${project.artifactId}-plugin</url>
-    <tag>aqua-security-scanner-3.1.1</tag>
+    <tag>aqua-security-scanner-3.2.0-SNAPSHOT</tag>
   </scm>
 
   <build>

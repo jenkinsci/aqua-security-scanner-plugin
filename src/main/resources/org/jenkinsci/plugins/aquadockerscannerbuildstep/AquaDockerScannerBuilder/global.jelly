@@ -4,25 +4,30 @@
     This Jelly script is used to produce the global configuration option.
   -->
   <f:section title="Aqua Security">
-  	<f:block>
-     <b>Choose aqua version:</b>
-   </f:block>
-   <f:radioBlock checked="${instance.isVersion('2.x')}" name="version" value="2.x" title="Version 2.x" inline="true">
-   </f:radioBlock>
-   <f:radioBlock checked="${instance.isVersion('3.x') or true}" name="version" value="3.x" title="Version 3.x and above" inline="true">
-   </f:radioBlock>
+ 
     <f:entry title="Aqua scanner image" field="aquaScannerImage">
       <f:textbox />
     </f:entry>
     <f:entry title="Aqua API URL" field="apiURL">
       <f:textbox />
     </f:entry>
-    <f:entry title="User" field="user">
-      <f:textbox />
-    </f:entry>
-    <f:entry title="Password" field="password">
-      <f:password />
-    </f:entry>
+    <f:radioBlock checked="${instance.isAuthType('uname') or true}" name="auth" value="uname" title="Username/Password for authentication">
+     <f:nested>
+        <f:entry title="User" field="user">
+          <f:textbox />
+        </f:entry>
+        <f:entry title="Password" field="password">
+          <f:password />
+        </f:entry>
+      </f:nested>
+    </f:radioBlock>
+    <f:radioBlock checked="${instance.isAuthType('token')}" name="auth" value="token" title="Token for authentication">
+      <f:nested>
+        <f:entry title="Token" field="token">
+          <f:password />
+        </f:entry>
+      </f:nested>
+    </f:radioBlock>
     <f:entry title="Timeout" field="timeout">
       <f:textbox />
     </f:entry>

@@ -25,10 +25,10 @@ import java.nio.file.Paths;
 public class ScannerExecuter {
 
 	public static int execute(Run<?, ?> build, FilePath workspace, Launcher launcher, TaskListener listener, String artifactName,
-			String aquaScannerImage, String apiURL, String user, Secret password, String version, int timeout,
+			String aquaScannerImage, String apiURL, String user, Secret password, Secret token, int timeout,
 			String runOptions, String locationType, String localImage, String registry, boolean register, String hostedImage,
 			boolean hideBase, boolean showNegligible, boolean checkonly, String notCompliesCmd, boolean caCertificates,
-			String policies, String customFlags, String tarFilePath, String containerRuntime, String scannerPath) {
+			String policies, Secret localToken, String customFlags, String tarFilePath, String containerRuntime, String scannerPath) {
 
 		PrintStream print_stream = null;
 		try {
@@ -65,18 +65,10 @@ public class ScannerExecuter {
 			switch (locationType) {
 			case "hosted":
 				args.addTokenized(runOptions);
-				if (version.trim().equals("2.x")) {
-					args.add("--rm", aquaScannerImage, "--host", apiURL,
-							"--registry", registry, "--image", hostedImage);
-					if (timeout > 0) { // 0 means use default
-						args.add("--timeout", String.valueOf(timeout));
-					}
 
-				} else if (version.trim().equals("3.x")) {
-					args.add("--rm", "-v", "/var/run/docker.sock:/var/run/docker.sock", aquaScannerImage, "scan",
-					    "--host", apiURL, "--registry", registry,
-							hostedImage);
-				}
+				args.add("--rm", "-v", "/var/run/docker.sock:/var/run/docker.sock", aquaScannerImage, "scan",
+					"--host", apiURL, "--registry", registry,
+						hostedImage);				
 
 				if (hideBase) {
 					args.add("--hide-base");
@@ -90,20 +82,12 @@ public class ScannerExecuter {
 					args.add("-v", scannerPath+":/aquasec/scannercli:Z", "--entrypoint=/aquasec/scannercli");
 				}
 				args.addTokenized(runOptions);
-				if (version.trim().equals("2.x")) {
-					if(isDocker){
-						args.add("--rm", "-v", "/var/run/docker.sock:/var/run/docker.sock", aquaScannerImage, "--host", apiURL, "--local", "--image", localImage);
-					} else {
-						args.add("--rm", "-u", "root", localImage,"--host", apiURL, "--image");						
-					}
-					
-				} else if (version.trim().equals("3.x")) {
-					if(isDocker){
-						args.add("--rm", "-v", "/var/run/docker.sock:/var/run/docker.sock", aquaScannerImage, "scan", "--host", apiURL, "--local", localImage);	
-					} else {
-						args.add("--rm", "-u", "root", localImage, "scan", "--host", apiURL);
-					}	
-				}
+				if(isDocker){
+					args.add("--rm", "-v", "/var/run/docker.sock:/var/run/docker.sock", aquaScannerImage, "scan", "--host", apiURL, "--local", localImage);	
+				} else {
+					args.add("--rm", "-u", "root", localImage, "scan", "--host", apiURL);
+				}	
+				
 				if (register) {
 					args.add("--registry", registry);
 					args.add("--register");
@@ -111,17 +95,16 @@ public class ScannerExecuter {
 				break;
 			case "dockerarchive":
 				args.addTokenized(runOptions);
-				if (version.trim().equals("3.x")) {
+				
+				// extract file name from path for scan tagging
+				Path path = Paths.get(tarFilePath);
+				Path fileName = path.getFileName();
+				if (fileName == null)
+					throw new AbortException("can not extract the file name \n");
+				String imgName = fileName.toString().split("\\.")[0];
 
-					// extract file name from path for scan tagging
-					Path path = Paths.get(tarFilePath);
-					Path fileName = path.getFileName();
-					if (fileName == null)
-						throw new AbortException("can not extract the file name \n");
-					String imgName = fileName.toString().split("\\.")[0];
-
-					args.add("--rm", "-v", tarFilePath+":"+tarFilePath, aquaScannerImage, "scan", imgName+":tar", "--host", apiURL, "--docker-archive", tarFilePath);
-				}
+				args.add("--rm", "-v", tarFilePath+":"+tarFilePath, aquaScannerImage, "scan", imgName+":tar", "--host", apiURL, "--docker-archive", tarFilePath);
+				
 				break;
 			default:
 				return -1;
@@ -139,13 +122,29 @@ public class ScannerExecuter {
 			if (policies != null && !policies.equals("")) {
 				args.add("--policies", policies);
 			}
-			if(customFlags != null && !customFlags.equals("")) {
+
+			if (localToken != null && !Secret.toString(localToken).equals("")){
+				listener.getLogger().println("Received local token, will override global auth");
+				args.add("--token");
+				args.addMasked(localToken);
+			}else{
+				// Authentication, local token is priority
+				if(!Secret.toString(token).equals("")) {
+					listener.getLogger().println("Received global token, will override global username auth");
+					args.add("--token");
+					args.addMasked(token);
+				} else {
+					args.add("--user", user, "--password");
+					args.addMasked(password);
+				}
+			}
+			if(customFlags != null && !customFlags.equals("")) {				
 				args.addTokenized(customFlags);
 			}
 
-			args.add("--html", "--user", user, "--password");
-			args.addMasked(password);
+			args.add("--html");
 
+			
 			if (!isDocker){
 				args.add("--image-name", localImage);
 				args.add("--fs-scan", "/");

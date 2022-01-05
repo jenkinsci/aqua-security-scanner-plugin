@@ -18,6 +18,8 @@ import org.kohsuke.stapler.QueryParameter;
 import javax.annotation.CheckForNull;
 import javax.servlet.ServletException;
 import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import hudson.model.Run;
 import hudson.model.TaskListener;
@@ -47,6 +49,7 @@ public class AquaDockerScannerBuilder extends Builder implements SimpleBuildStep
 	private final boolean hideBase;
 	private final boolean showNegligible;
 	private final String policies;
+	private final Secret localToken;
 	private final String customFlags;
 
 	@CheckForNull
@@ -73,7 +76,7 @@ public class AquaDockerScannerBuilder extends Builder implements SimpleBuildStep
 	// "DataBoundConstructor"
 	@DataBoundConstructor
 	public AquaDockerScannerBuilder(String locationType, String registry, boolean register, String localImage, String hostedImage,
-			String onDisallowed, String notCompliesCmd,  boolean hideBase, boolean showNegligible, String policies,
+			String onDisallowed, String notCompliesCmd,  boolean hideBase, boolean showNegligible, String policies, Secret localToken,
 			String customFlags,	String tarFilePath, String containerRuntime, String scannerPath) {
 		this.locationType = locationType;
 		this.registry = registry;
@@ -85,6 +88,7 @@ public class AquaDockerScannerBuilder extends Builder implements SimpleBuildStep
 		this.hideBase = hideBase;
 		this.showNegligible = showNegligible;
 		this.policies = policies;
+		this.localToken = localToken;
 		this.customFlags = customFlags;
 		this.tarFilePath = tarFilePath;
 		this.containerRuntime = containerRuntime;
@@ -129,16 +133,16 @@ public class AquaDockerScannerBuilder extends Builder implements SimpleBuildStep
 		return onDisallowed;
 	}
 
-	public String getVersion() {
-		return getDescriptor().getVersion();
-	}
-
 	public String getNotCompliesCmd() {
 		return notCompliesCmd;
 	}
 
 	public String getPolicies() {
 		return policies;
+	}
+
+	public Secret getLocalToken() {
+		return localToken;
 	}
 
 	public String getCustomFlags() {
@@ -200,12 +204,25 @@ public class AquaDockerScannerBuilder extends Builder implements SimpleBuildStep
 		String apiURL = getDescriptor().getApiURL();
 		String user = getDescriptor().getUser();
 		Secret password = getDescriptor().getPassword();
-		String version = getDescriptor().getVersion();
+		Secret token = getDescriptor().getToken();
+
+		// If user and password is empty, check if token is provided as global or local value
+		if(("").equals(user) && Secret.toString(password).equals("") && 
+			Secret.toString(token).equals("") && Secret.toString(localToken).equals("")){
+				throw new AbortException("Either Username/Password or Token should be provided in Global Settings, or"+
+				" valid token provided with in Token field in the build configuration");
+			
+		}
+
 		int timeout = getDescriptor().getTimeout();
 		String runOptions = getDescriptor().getRunOptions();
 		boolean caCertificates = getDescriptor().getCaCertificates();
-		if (apiURL == null || apiURL.trim().equals("") || user == null || user.trim().equals("") || password == null
-				|| Secret.toString(password).trim().equals("")) {
+
+		boolean userAuth = (user == null || user.trim().equals("") || password == null
+		|| Secret.toString(password).trim().equals(""));
+		boolean tokenAuth = (token == null || Secret.toString(token).trim().equals(""));
+		
+		if (apiURL == null || apiURL.trim().equals("") || (userAuth && tokenAuth) ) {
 				throw new AbortException("Missing configuration. Please set the global configuration parameters in The \"Aqua Security\" section under  \"Manage Jenkins/Configure System\", before continuing.\n");
 		}
 
@@ -228,20 +245,21 @@ public class AquaDockerScannerBuilder extends Builder implements SimpleBuildStep
 			artifactSuffix = Integer.toString(count);
 			artifactName = "scanout-" + artifactSuffix + ".html";
 		}
+		// listener.getLogger().println("Username is "+user+" Password is "+password+" Token is "+token);
 
 		int exitCode = ScannerExecuter.execute(build, workspace,launcher, listener, artifactName, aquaScannerImage, apiURL, user,
-				password, version, timeout, runOptions, locationType, localImage, registry, register, hostedImage, hideBase,
+				password, token, timeout, runOptions, locationType, localImage, registry, register, hostedImage, hideBase,
 				showNegligible, onDisallowed == null || !onDisallowed.equals("fail"), notCompliesCmd, caCertificates,
-				policies, customFlags, tarFilePath, containerRuntime, scannerPath);
+				policies, localToken, customFlags, tarFilePath, containerRuntime, scannerPath);
 		build.addAction(new AquaScannerAction(build, artifactSuffix, artifactName));
 
 		archiveArtifacts(build, workspace, launcher, listener);
 
-		System.out.println("exitCode: " + exitCode);
+		listener.getLogger().println("exitCode: " + exitCode);
 		String failedMessage = "Scanning failed.";
 		switch (exitCode) {
 		case OK_CODE:
-				System.out.println("Scanning success.");
+				listener.getLogger().println("Scanning success.");
 				break;
 		case DISALLOWED_CODE:
 				throw new AbortException(failedMessage);
@@ -293,9 +311,10 @@ public class AquaDockerScannerBuilder extends Builder implements SimpleBuildStep
 		 */
 		private String aquaScannerImage;
 		private Secret apiURL;
+		private String authval;
 		private Secret user;
 		private Secret password;
-		private String version;
+		private Secret token;
 		private int timeout;
 		private String runOptions;
 		private boolean caCertificates;
@@ -340,11 +359,28 @@ public class AquaDockerScannerBuilder extends Builder implements SimpleBuildStep
 		public boolean configure(StaplerRequest req, JSONObject formData) throws FormException {
 			// To persist global configuration information,
 			// set that to properties and call save().
+
+			// boolean flagNoAuthSet = false;
 			aquaScannerImage = formData.getString("aquaScannerImage");
 			apiURL = Secret.fromString(formData.getString("apiURL"));
-			user = Secret.fromString(formData.getString("user"));
-			password = Secret.fromString(formData.getString("password"));
-			version = formData.getString("version");
+			JSONObject authForm = formData.getJSONObject("auth");
+			authval = authForm.getString("value") ;
+
+			try{		
+				if (authval.equals("token")){
+					token = Secret.fromString(authForm.getString("token"));
+					user = Secret.fromString("");
+					password = Secret.fromString("");
+				}else{
+					user = Secret.fromString(authForm.getString("user"));
+					password = Secret.fromString(authForm.getString("password"));
+					token = Secret.fromString("");
+				}
+				
+			}catch (net.sf.json.JSONException te){
+				throw new FormException("Either Username/PWD or token must be set. Error is "+ te.getMessage(), "auth");
+			}
+			
 			try {
 				timeout = formData.getInt("timeout");
 			} catch (net.sf.json.JSONException e) {
@@ -364,6 +400,10 @@ public class AquaDockerScannerBuilder extends Builder implements SimpleBuildStep
 			return Secret.toString(apiURL);
 		}
 
+		public String getAuthVal() {
+			return authval;
+		}
+
 		public String getUser() {
 			return Secret.toString(user);
 		}
@@ -372,8 +412,8 @@ public class AquaDockerScannerBuilder extends Builder implements SimpleBuildStep
 			return password;
 		}
 
-		public String getVersion() {
-			return version;
+		public Secret getToken() {
+			return token;
 		}
 
 		public int getTimeout() {
@@ -384,16 +424,17 @@ public class AquaDockerScannerBuilder extends Builder implements SimpleBuildStep
 			return runOptions;
 		}
 
-		public String isVersion(String ver) {
-			System.out.println("Checking version:" + ver);
-			System.out.println("Saved version:" + getVersion());
-			if (getVersion() == null) {
-				// default for new step GUI
-				return "3.x".equals(ver) ? "true" : "false";
+		public String isAuthType(String auth) {
+			Logger.getLogger("").log(Level.INFO, "Checking auth type:" + auth);
+			Logger.getLogger("").log(Level.INFO, "Saved auth type:" + getAuthVal());
+			if (getAuthVal() == null) {
+				// default auth type for any customer is username/pwd
+				return "uname".equals(auth) ? "true" : "false";
 			} else {
-				return getVersion().equals(ver) ? "true" : "false";
+				return getAuthVal().equals(auth) ? "true" : "false";
 			}
 		}
+
 		public boolean getCaCertificates() {
 			return caCertificates;
 		}

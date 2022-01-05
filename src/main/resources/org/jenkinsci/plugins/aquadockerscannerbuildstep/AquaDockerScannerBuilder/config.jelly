@@ -51,10 +51,13 @@
      <f:checkbox name="register"/>
     </f:entry>
    <f:entry title="Registry" field="registry">
-<f:textbox />
-  </f:entry>
+     <f:textbox />
+   </f:entry>
    <f:entry title="Policies" field="policies">
     <f:textbox />
+   </f:entry>
+   <f:entry title="Token" field="localToken">
+    <f:password />
    </f:entry>
    <f:entry title="Custom flags" field="customFlags">
     <f:textbox />
