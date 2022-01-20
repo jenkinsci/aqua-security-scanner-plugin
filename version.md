@@ -6,6 +6,10 @@ registries, for security vulnerabilities, using the API provided by
 
 ## Changelog:
 
+#### **Version 3.2 (Jan 19, 2022)**
+
+-   Added support of aqua scanner token for authentication at the global and job level settings.
+
 #### **Version 3.1.2 (Sept 16, 2021)**
 
 -   Added custom container runtime scanning support with following optional fields:
