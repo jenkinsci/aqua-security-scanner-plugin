@@ -133,10 +133,11 @@ public class ScannerExecuter {
 			}else{
 				// Authentication, local token is priority
 				if(!Secret.toString(token).equals("")) {
-					listener.getLogger().println("Received global token, will override global username auth");
+					listener.getLogger().println("Received global token");
 					args.add("--token");
 					args.addMasked(token);
 				} else {
+					listener.getLogger().println("Received global username password auth");
 					args.add("--user", user, "--password");
 					args.addMasked(password);
 				}
