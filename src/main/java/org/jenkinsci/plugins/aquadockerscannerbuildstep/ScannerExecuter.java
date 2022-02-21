@@ -48,6 +48,9 @@ public class ScannerExecuter {
 			if(scannerPath == null){
 				scannerPath = "";
 			}
+			if(localToken == null){
+				localToken = Secret.fromString("");
+			}
 
 			boolean isDocker = false;
 			if("".equals(containerRuntime) || "docker".equals(containerRuntime)) {

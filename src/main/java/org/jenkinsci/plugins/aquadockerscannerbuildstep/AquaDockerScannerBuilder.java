@@ -49,7 +49,6 @@ public class AquaDockerScannerBuilder extends Builder implements SimpleBuildStep
 	private final boolean hideBase;
 	private final boolean showNegligible;
 	private final String policies;
-	private final Secret localToken;
 	private final String customFlags;
 
 	@CheckForNull
@@ -60,6 +59,9 @@ public class AquaDockerScannerBuilder extends Builder implements SimpleBuildStep
 
 	@CheckForNull
 	private String tarFilePath;
+
+	@CheckForNull
+	private Secret localToken;
 
 	private static int count;
 	private static int buildId = 0;
@@ -141,6 +143,7 @@ public class AquaDockerScannerBuilder extends Builder implements SimpleBuildStep
 		return policies;
 	}
 
+	@CheckForNull
 	public Secret getLocalToken() {
 		return localToken;
 	}
@@ -193,6 +196,11 @@ public class AquaDockerScannerBuilder extends Builder implements SimpleBuildStep
 	@DataBoundSetter
 	public void setTarFilePath(@CheckForNull String tarFilePath) {
 		this.tarFilePath = Util.fixNull(tarFilePath);
+	}
+
+	@DataBoundSetter
+	public void setLocalToken(@CheckForNull Secret localToken) {
+		this.localToken = Secret.fromString(Util.fixNull(Secret.toString(localToken)));
 	}
 
 	@Override
