@@ -28,7 +28,7 @@ public class ScannerExecuter {
 			String aquaScannerImage, String apiURL, String user, Secret password, Secret token, int timeout,
 			String runOptions, String locationType, String localImage, String registry, boolean register, String hostedImage,
 			boolean hideBase, boolean showNegligible, boolean checkonly, String notCompliesCmd, boolean caCertificates,
-			String policies, Secret localToken, String customFlags, String tarFilePath, String containerRuntime, String scannerPath) {
+			String policies, Secret localTokenSecret, String customFlags, String tarFilePath, String containerRuntime, String scannerPath) {
 
 		PrintStream print_stream = null;
 		try {
@@ -48,8 +48,8 @@ public class ScannerExecuter {
 			if(scannerPath == null){
 				scannerPath = "";
 			}
-			if(localToken == null){
-				localToken = Secret.fromString("");
+			if(localTokenSecret == null){
+				localTokenSecret = Secret.fromString("");
 			}
 
 			boolean isDocker = false;
@@ -126,10 +126,10 @@ public class ScannerExecuter {
 				args.add("--policies", policies);
 			}
 
-			if (localToken != null && !Secret.toString(localToken).equals("")){
+			if (localTokenSecret != null && !Secret.toString(localTokenSecret).equals("")){
 				listener.getLogger().println("Received local token, will override global auth");
 				args.add("--token");
-				args.addMasked(localToken);
+				args.addMasked(localTokenSecret);
 			}else{
 				// Authentication, local token is priority
 				if(!Secret.toString(token).equals("")) {
