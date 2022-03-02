@@ -49,7 +49,6 @@ public class AquaDockerScannerBuilder extends Builder implements SimpleBuildStep
 	private final boolean hideBase;
 	private final boolean showNegligible;
 	private final String policies;
-	private final Secret localToken;
 	private final String customFlags;
 
 	@CheckForNull
@@ -60,6 +59,11 @@ public class AquaDockerScannerBuilder extends Builder implements SimpleBuildStep
 
 	@CheckForNull
 	private String tarFilePath;
+
+	@CheckForNull
+	private String localToken;
+
+	private Secret localTokenSecret;
 
 	private static int count;
 	private static int buildId = 0;
@@ -76,7 +80,7 @@ public class AquaDockerScannerBuilder extends Builder implements SimpleBuildStep
 	// "DataBoundConstructor"
 	@DataBoundConstructor
 	public AquaDockerScannerBuilder(String locationType, String registry, boolean register, String localImage, String hostedImage,
-			String onDisallowed, String notCompliesCmd,  boolean hideBase, boolean showNegligible, String policies, Secret localToken,
+			String onDisallowed, String notCompliesCmd,  boolean hideBase, boolean showNegligible, String policies, String localToken,
 			String customFlags,	String tarFilePath, String containerRuntime, String scannerPath) {
 		this.locationType = locationType;
 		this.registry = registry;
@@ -93,6 +97,7 @@ public class AquaDockerScannerBuilder extends Builder implements SimpleBuildStep
 		this.tarFilePath = tarFilePath;
 		this.containerRuntime = containerRuntime;
 		this.scannerPath = scannerPath;
+		this.localTokenSecret = hudson.util.Secret.fromString(localToken);
 	}
 
 	/**
@@ -141,7 +146,8 @@ public class AquaDockerScannerBuilder extends Builder implements SimpleBuildStep
 		return policies;
 	}
 
-	public Secret getLocalToken() {
+	@CheckForNull
+	public String getLocalToken() {
 		return localToken;
 	}
 
@@ -195,6 +201,11 @@ public class AquaDockerScannerBuilder extends Builder implements SimpleBuildStep
 		this.tarFilePath = Util.fixNull(tarFilePath);
 	}
 
+	@DataBoundSetter
+	public void setLocalToken(@CheckForNull String localToken) {
+		this.localToken = Util.fixNull(localToken);
+	}
+
 	@Override
 	public void perform(Run<?, ?> build, FilePath workspace, Launcher launcher, TaskListener listener)
 			throws AbortException, java.lang.InterruptedException {
@@ -208,7 +219,7 @@ public class AquaDockerScannerBuilder extends Builder implements SimpleBuildStep
 
 		// If user and password is empty, check if token is provided as global or local value
 		if(("").equals(user) && Secret.toString(password).equals("") && 
-			Secret.toString(token).equals("") && Secret.toString(localToken).equals("")){
+			Secret.toString(token).equals("") && Secret.toString(localTokenSecret).equals("")){
 				throw new AbortException("Either Username/Password or Token should be provided in Global Settings, or"+
 				" valid token provided with in Token field in the build configuration");
 			
@@ -250,7 +261,7 @@ public class AquaDockerScannerBuilder extends Builder implements SimpleBuildStep
 		int exitCode = ScannerExecuter.execute(build, workspace,launcher, listener, artifactName, aquaScannerImage, apiURL, user,
 				password, token, timeout, runOptions, locationType, localImage, registry, register, hostedImage, hideBase,
 				showNegligible, onDisallowed == null || !onDisallowed.equals("fail"), notCompliesCmd, caCertificates,
-				policies, localToken, customFlags, tarFilePath, containerRuntime, scannerPath);
+				policies, localTokenSecret, customFlags, tarFilePath, containerRuntime, scannerPath);
 		build.addAction(new AquaScannerAction(build, artifactSuffix, artifactName));
 
 		archiveArtifacts(build, workspace, launcher, listener);

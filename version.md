@@ -6,6 +6,10 @@ registries, for security vulnerabilities, using the API provided by
 
 ## Changelog:
 
+#### **Version 3.2.1 (Feb 25, 2022)**
+
+-   Made localToken an optional field which accepts string value in pipeline syntax 
+
 #### **Version 3.2 (Jan 19, 2022)**
 
 -   Added support of aqua scanner token for authentication at the global and job level settings.
