@@ -6,6 +6,10 @@ registries, for security vulnerabilities, using the API provided by
 
 ## Changelog:
 
+#### **Version 3.2.2 (Feb 02, 2023)**
+
+-   For each assurance policy failure, show the name of the specific controls that failed.
+
 #### **Version 3.2.1 (Feb 25, 2022)**
 
 -   Made localToken an optional field which accepts string value in pipeline syntax 
