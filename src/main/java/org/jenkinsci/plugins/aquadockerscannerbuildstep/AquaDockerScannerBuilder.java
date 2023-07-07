@@ -26,6 +26,10 @@ import hudson.model.TaskListener;
 import jenkins.tasks.SimpleBuildStep;
 import org.jenkinsci.Symbol;
 import hudson.util.Secret;
+import java.util.UUID;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
 
 
 /**
@@ -64,17 +68,6 @@ public class AquaDockerScannerBuilder extends Builder implements SimpleBuildStep
 	private String localToken;
 
 	private Secret localTokenSecret;
-
-	private static int count;
-	private static int buildId = 0;
-
-	public synchronized static void setCount(int count) {
-		AquaDockerScannerBuilder.count = count;
-	}
-
-	public synchronized static void setBuildId(int buildId) {
-		AquaDockerScannerBuilder.buildId = buildId;
-	}
 
 	// Fields in config.jelly must match the parameter names in the
 	// "DataBoundConstructor"
@@ -234,7 +227,7 @@ public class AquaDockerScannerBuilder extends Builder implements SimpleBuildStep
 		boolean tokenAuth = (token == null || Secret.toString(token).trim().equals(""));
 		
 		if (apiURL == null || apiURL.trim().equals("") || (userAuth && tokenAuth) ) {
-				throw new AbortException("Missing configuration. Please set the global configuration parameters in The \"Aqua Security\" section under  \"Manage Jenkins/Configure System\", before continuing.\n");
+			throw new AbortException("Missing configuration. Please set the global configuration parameters in The \"Aqua Security\" section under  \"Manage Jenkins/Configure System\", before continuing.\n");
 		}
 
 		// Allow API urls without the protocol part, add the "https://" in this case
@@ -242,27 +235,35 @@ public class AquaDockerScannerBuilder extends Builder implements SimpleBuildStep
 			apiURL = "https://" + apiURL;
 		}
 
-		// Support unique names for artifacts when there are multiple steps in the same
-		// build
-		String artifactSuffix, artifactName;
-		if (build.hashCode() != buildId) {
-			// New build
-			setBuildId(build.hashCode());
-			setCount(1);
-			artifactSuffix = null; // When ther is only one step, there should be no suffix at all
-			artifactName = "scanout.html";
-		} else {
-			setCount(count + 1);
-			artifactSuffix = Integer.toString(count);
-			artifactName = "scanout-" + artifactSuffix + ".html";
-		}
-		// listener.getLogger().println("Username is "+user+" Password is "+password+" Token is "+token);
-
+		// Support unique names for artifacts when there are multiple steps in the same build
+		String artifactSuffix = UUID.randomUUID().toString().replaceAll("-", "");
+		String artifactName = "scanout-" + artifactSuffix + ".html";;
+		String displayImageName = "";
+		
+		switch (locationType) {
+			case "hosted":
+				displayImageName = hostedImage;
+				break;
+			case "local":
+				displayImageName = localImage;
+				break;
+			case "dockerarchive":
+				// extract file name from path for scan tagging
+				Path path = Paths.get(tarFilePath);
+				Path fileName = path.getFileName();
+				if (fileName == null)
+					throw new AbortException("can not extract the file name \n");
+				displayImageName = fileName.toString().split("\\.")[0];
+				break;
+			default:
+				displayImageName = "";	
+		}	
+		
 		int exitCode = ScannerExecuter.execute(build, workspace,launcher, listener, artifactName, aquaScannerImage, apiURL, user,
 				password, token, timeout, runOptions, locationType, localImage, registry, register, hostedImage, hideBase,
 				showNegligible, onDisallowed == null || !onDisallowed.equals("fail"), notCompliesCmd, caCertificates,
 				policies, localTokenSecret, customFlags, tarFilePath, containerRuntime, scannerPath);
-		build.addAction(new AquaScannerAction(build, artifactSuffix, artifactName));
+		build.addAction(new AquaScannerAction(build, artifactSuffix, artifactName, displayImageName));
 
 		archiveArtifacts(build, workspace, launcher, listener);
 

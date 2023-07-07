@@ -6,6 +6,11 @@ registries, for security vulnerabilities, using the API provided by
 
 ## Changelog:
 
+#### **Version 3.2.4 (Jun 14, 2023)**
+
+- Fix [JENKINS-71287](https://issues.jenkins.io/browse/JENKINS-71287) plugin is overriding   reports when several builds\jobs are running in parallel
+- Update the Action Menu items added by the plugin to contain the scanned image name.
+
 #### **Version 3.2.2 (Feb 02, 2023)**
 
 -   For each assurance policy failure, show the name of the specific controls that failed.
