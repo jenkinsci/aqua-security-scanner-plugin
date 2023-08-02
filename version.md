@@ -6,6 +6,10 @@ registries, for security vulnerabilities, using the API provided by
 
 ## Changelog:
 
+#### **Version 3.2.5 (Aug 2, 2023)**
+
+- Added try and catch block for handling StringIndexOutOfBoundsException, So it will not fail scan and completed job with out any fail.
+
 #### **Version 3.2.4 (Jun 14, 2023)**
 
 - Fix [JENKINS-71287](https://issues.jenkins.io/browse/JENKINS-71287) plugin is overriding   reports when several builds\jobs are running in parallel
