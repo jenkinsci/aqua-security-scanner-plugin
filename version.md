@@ -6,6 +6,12 @@ registries, for security vulnerabilities, using the API provided by
 
 ## Changelog:
 
+#### **Version 3.2.5 (Sep 14, 2023)**
+
+- Fix [SLK-69159] StringIndexOutOfBoundsException occuring inconsistently when scanning images.
+
+Happened because of we are not handling `String.substring()` properly, Now its handled.
+
 #### **Version 3.2.4 (Jun 14, 2023)**
 
 - Fix [JENKINS-71287](https://issues.jenkins.io/browse/JENKINS-71287) plugin is overriding   reports when several builds\jobs are running in parallel
