@@ -35,15 +35,15 @@
       <f:entry title="Image name" field="hostedImage">
 	<f:textbox />
       </f:entry>
-      <f:entry title="Hide base image vulnerabilities" field="hideBase">
-		<f:checkbox name="hideBase"/>
-      </f:entry>
    </f:radioBlock>
    <f:radioBlock checked="${instance.isLocationType('dockerarchive')}" name="locationType" value="dockerarchive" title="docker-archive" inline="true" help="/plugin/aqua-security-scanner/help-isdockerarchive.html">
      <f:entry title="Tar file path" field="tarFilePath" help="/plugin/aqua-security-scanner/help-buildFails.html">
    	   <f:textbox />
      </f:entry>
    </f:radioBlock>
+   <f:entry title="Hide base image vulnerabilities" field="hideBase">
+    <f:checkbox name="hideBase"/>
+   </f:entry>
    <f:entry title="Show negligible vulnerabilities" field="showNegligible">
      <f:checkbox name="showNegligible"/>
    </f:entry>
