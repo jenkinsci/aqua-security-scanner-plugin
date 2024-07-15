@@ -73,9 +73,6 @@ public class ScannerExecuter {
 					"--host", apiURL, "--registry", registry,
 						hostedImage);				
 
-				if (hideBase) {
-					args.add("--hide-base");
-				}
 				if (register) {
 					args.add("--register");
 				}
@@ -125,7 +122,9 @@ public class ScannerExecuter {
 			if (policies != null && !policies.equals("")) {
 				args.add("--policies", policies);
 			}
-
+            if (hideBase) {
+                args.add("--hide-base");
+            }
 			if (localTokenSecret != null && !Secret.toString(localTokenSecret).equals("")){
 				listener.getLogger().println("Received local token, will override global auth");
 				args.add("--token");
