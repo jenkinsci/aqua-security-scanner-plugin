@@ -228,9 +228,7 @@ public class ScannerExecuter {
 		if (htmlStart < htmlEnd){
 			scanOutput = scanOutput.substring(htmlStart,htmlEnd);
 		} 
-		
-		String scanRegex = "(?m)\\d{4}\\-(0?[1-9]|1[012])\\-(0?[1-9]|[12][0-9]|3[01]).*";
-		scanOutput = scanOutput.replaceAll(scanRegex, "");
+
 		try
 		{
 			target.write(scanOutput, "UTF-8");
