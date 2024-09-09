@@ -3,33 +3,29 @@ package org.jenkinsci.plugins.aquadockerscannerbuildstep;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import hudson.*;
 import hudson.util.FormValidation;
-import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
-import hudson.tasks.Builder;
-//import hudson.model.BuildListener;
+import hudson.model.Run;
+import hudson.model.TaskListener;
 import hudson.tasks.ArtifactArchiver;
 import hudson.tasks.BuildStepDescriptor;
+import hudson.tasks.Builder;
+import hudson.util.Secret;
+import jenkins.tasks.SimpleBuildStep;
+import lombok.Getter;
 import net.sf.json.JSONObject;
+import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
-import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.QueryParameter;
-
+import org.kohsuke.stapler.StaplerRequest;
 import javax.annotation.CheckForNull;
 import javax.servlet.ServletException;
 import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import hudson.model.Run;
-import hudson.model.TaskListener;
-import jenkins.tasks.SimpleBuildStep;
-import org.jenkinsci.Symbol;
-import hudson.util.Secret;
-import java.util.UUID;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-
+import java.util.UUID;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 
 /**
@@ -39,21 +35,35 @@ import java.nio.file.Paths;
  *
  * @author Oran Moshai
  */
-public class AquaDockerScannerBuilder extends Builder implements SimpleBuildStep{
+public class AquaDockerScannerBuilder extends Builder implements SimpleBuildStep {
 
 	public static final int OK_CODE = 0;
 	public static final int DISALLOWED_CODE = 4;
-	private final String locationType;
-	private final String registry;
+    /**
+     * -- GETTER --
+     *  Public access required by config.jelly to display current values in
+     *  configuration screen.
+     */
+    @Getter
+    private final String locationType;
+	@Getter
+    private final String registry;
 	private final boolean register;
-	private final String localImage;
-	private final String hostedImage;
-	private final String onDisallowed;
-	private final String notCompliesCmd;
+	@Getter
+    private final String localImage;
+	@Getter
+    private final String hostedImage;
+	@Getter
+    private final String onDisallowed;
+	@Getter
+    private final String notCompliesCmd;
 	private final boolean hideBase;
 	private final boolean showNegligible;
-	private final String policies;
-	private final String customFlags;
+	@Getter
+    private final String policies;
+	@Getter
+    private final String customFlags;
+	private String runtimeDirectory;
 
 	@CheckForNull
 	private String containerRuntime;
@@ -74,7 +84,7 @@ public class AquaDockerScannerBuilder extends Builder implements SimpleBuildStep
 	@DataBoundConstructor
 	public AquaDockerScannerBuilder(String locationType, String registry, boolean register, String localImage, String hostedImage,
 			String onDisallowed, String notCompliesCmd,  boolean hideBase, boolean showNegligible, String policies, String localToken,
-			String customFlags,	String tarFilePath, String containerRuntime, String scannerPath) {
+			String customFlags,	String tarFilePath, String containerRuntime, String scannerPath, String runtimeDirectory) {
 		this.locationType = locationType;
 		this.registry = registry;
 		this.register = register;
@@ -91,17 +101,10 @@ public class AquaDockerScannerBuilder extends Builder implements SimpleBuildStep
 		this.containerRuntime = containerRuntime;
 		this.scannerPath = scannerPath;
 		this.localTokenSecret = hudson.util.Secret.fromString(localToken);
+		this.runtimeDirectory = runtimeDirectory;
 	}
 
-	/**
-	 * Public access required by config.jelly to display current values in
-	 * configuration screen.
-	 */
-	public String getLocationType() {
-		return locationType;
-	}
-
-	@CheckForNull
+    @CheckForNull
 	public String getContainerRuntime() {
 		return containerRuntime;
 	}
@@ -111,44 +114,16 @@ public class AquaDockerScannerBuilder extends Builder implements SimpleBuildStep
 		return scannerPath;
 	}
 
-	public String getRegistry() {
-		return registry;
-	}
-
-	public boolean getRegister() {
+    public boolean getRegister() {
 		return register;
 	}
 
-	public String getLocalImage() {
-		return localImage;
-	}
-
-	public String getHostedImage() {
-		return hostedImage;
-	}
-
-	public String getOnDisallowed() {
-		return onDisallowed;
-	}
-
-	public String getNotCompliesCmd() {
-		return notCompliesCmd;
-	}
-
-	public String getPolicies() {
-		return policies;
-	}
-
-	@CheckForNull
+    @CheckForNull
 	public String getLocalToken() {
 		return localToken;
 	}
 
-	public String getCustomFlags() {
-		return customFlags;
-	}
-
-	public boolean getHideBase() {
+    public boolean getHideBase() {
 		return hideBase;
 	}
 
@@ -199,6 +174,11 @@ public class AquaDockerScannerBuilder extends Builder implements SimpleBuildStep
 		this.localToken = Util.fixNull(localToken);
 	}
 
+	@DataBoundSetter
+	public void setRuntimeDirectory(@CheckForNull String runtimeDirectory) {
+		this.runtimeDirectory = Util.fixNull(runtimeDirectory);
+	}
+
 	@Override
 	public void perform(Run<?, ?> build, FilePath workspace, Launcher launcher, TaskListener listener)
 			throws AbortException, java.lang.InterruptedException {
@@ -211,8 +191,8 @@ public class AquaDockerScannerBuilder extends Builder implements SimpleBuildStep
 		Secret token = getDescriptor().getToken();
 
 		// If user and password is empty, check if token is provided as global or local value
-		if(("").equals(user) && Secret.toString(password).equals("") && 
-			Secret.toString(token).equals("") && Secret.toString(localTokenSecret).equals("")){
+		if(user.isEmpty() && Secret.toString(password).isEmpty() &&
+                Secret.toString(token).isEmpty() && Secret.toString(localTokenSecret).isEmpty()){
 				throw new AbortException("Either Username/Password or Token should be provided in Global Settings, or"+
 				" valid token provided with in Token field in the build configuration");
 			
@@ -223,21 +203,22 @@ public class AquaDockerScannerBuilder extends Builder implements SimpleBuildStep
 		boolean caCertificates = getDescriptor().getCaCertificates();
 
 		boolean userAuth = (user == null || user.trim().equals("") || password == null
-		|| Secret.toString(password).trim().equals(""));
+				|| Secret.toString(password).trim().equals(""));
 		boolean tokenAuth = (token == null || Secret.toString(token).trim().equals(""));
-		
-		if (apiURL == null || apiURL.trim().equals("") || (userAuth && tokenAuth) ) {
+
+		if (apiURL == null || apiURL.trim().isEmpty() || (userAuth && tokenAuth)) {
 			throw new AbortException("Missing configuration. Please set the global configuration parameters in The \"Aqua Security\" section under  \"Manage Jenkins/Configure System\", before continuing.\n");
 		}
 
 		// Allow API urls without the protocol part, add the "https://" in this case
-		if (apiURL.indexOf("://") == -1) {
+		if (!apiURL.contains("://")) {
 			apiURL = "https://" + apiURL;
 		}
 
 		// Support unique names for artifacts when there are multiple steps in the same build
 		String artifactSuffix = UUID.randomUUID().toString().replaceAll("-", "");
-		String artifactName = "scanout-" + artifactSuffix + ".html";;
+		String artifactName = "scanout-" + artifactSuffix + ".html";
+		;
 		String displayImageName = "";
 		
 		switch (locationType) {
@@ -262,7 +243,7 @@ public class AquaDockerScannerBuilder extends Builder implements SimpleBuildStep
 		int exitCode = ScannerExecuter.execute(build, workspace,launcher, listener, artifactName, aquaScannerImage, apiURL, user,
 				password, token, timeout, runOptions, locationType, localImage, registry, register, hostedImage, hideBase,
 				showNegligible, onDisallowed == null || !onDisallowed.equals("fail"), notCompliesCmd, caCertificates,
-				policies, localTokenSecret, customFlags, tarFilePath, containerRuntime, scannerPath);
+				policies, localTokenSecret, customFlags, tarFilePath, containerRuntime, scannerPath, runtimeDirectory);
 		build.addAction(new AquaScannerAction(build, artifactSuffix, artifactName, displayImageName));
 
 		archiveArtifacts(build, workspace, launcher, listener);
@@ -321,14 +302,19 @@ public class AquaDockerScannerBuilder extends Builder implements SimpleBuildStep
 		 * To persist global configuration information, simply store it in a field and
 		 * call save().
 		 */
-		private String aquaScannerImage;
+		@Getter
+        private String aquaScannerImage;
 		private Secret apiURL;
 		private String authval;
 		private Secret user;
-		private Secret password;
-		private Secret token;
-		private int timeout;
-		private String runOptions;
+		@Getter
+        private Secret password;
+		@Getter
+        private Secret token;
+		@Getter
+        private int timeout;
+		@Getter
+        private String runOptions;
 		private boolean caCertificates;
 
 		/**
@@ -342,8 +328,7 @@ public class AquaDockerScannerBuilder extends Builder implements SimpleBuildStep
 		/**
 		 * Performs on-the-fly validation of the form field 'name'.
 		 *
-		 * @param value
-		 *            This parameter receives the value that the user has typed.
+		 * @param value This parameter receives the value that the user has typed.
 		 * @return Indicates the outcome of the validation. This is sent to the browser.
 		 */
 		public FormValidation doCheckTimeout(@QueryParameter String value) throws IOException, ServletException {
@@ -404,11 +389,7 @@ public class AquaDockerScannerBuilder extends Builder implements SimpleBuildStep
 			return super.configure(req, formData);
 		}
 
-		public String getAquaScannerImage() {
-			return aquaScannerImage;
-		}
-
-		public String getApiURL() {
+        public String getApiURL() {
 			return Secret.toString(apiURL);
 		}
 
@@ -420,23 +401,7 @@ public class AquaDockerScannerBuilder extends Builder implements SimpleBuildStep
 			return Secret.toString(user);
 		}
 
-		public Secret getPassword() {
-			return password;
-		}
-
-		public Secret getToken() {
-			return token;
-		}
-
-		public int getTimeout() {
-			return timeout;
-		}
-
-		public String getRunOptions() {
-			return runOptions;
-		}
-
-		public String isAuthType(String auth) {
+        public String isAuthType(String auth) {
 			Logger.getLogger("").log(Level.INFO, "Checking auth type:" + auth);
 			Logger.getLogger("").log(Level.INFO, "Saved auth type:" + getAuthVal());
 			if (getAuthVal() == null) {

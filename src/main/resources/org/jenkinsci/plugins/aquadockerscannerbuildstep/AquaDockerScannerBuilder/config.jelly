@@ -44,6 +44,9 @@
    <f:entry title="Hide base image vulnerabilities" field="hideBase">
     <f:checkbox name="hideBase"/>
    </f:entry>
+    <f:entry title="Runtime Directory (only for podman)" field="runtimeDirectory">
+        <f:textbox default="" />
+    </f:entry>
    <f:entry title="Show negligible vulnerabilities" field="showNegligible">
      <f:checkbox name="showNegligible"/>
    </f:entry>
