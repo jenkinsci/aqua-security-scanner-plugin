@@ -54,6 +54,7 @@ public class AquaDockerScannerBuilder extends Builder implements SimpleBuildStep
 	private final boolean showNegligible;
 	private final String policies;
 	private final String customFlags;
+	private String runtimeDirectory;
 
 	@CheckForNull
 	private String containerRuntime;
@@ -74,7 +75,7 @@ public class AquaDockerScannerBuilder extends Builder implements SimpleBuildStep
 	@DataBoundConstructor
 	public AquaDockerScannerBuilder(String locationType, String registry, boolean register, String localImage, String hostedImage,
 			String onDisallowed, String notCompliesCmd,  boolean hideBase, boolean showNegligible, String policies, String localToken,
-			String customFlags,	String tarFilePath, String containerRuntime, String scannerPath) {
+			String customFlags,	String tarFilePath, String containerRuntime, String scannerPath, String runtimeDirectory) {
 		this.locationType = locationType;
 		this.registry = registry;
 		this.register = register;
@@ -91,6 +92,7 @@ public class AquaDockerScannerBuilder extends Builder implements SimpleBuildStep
 		this.containerRuntime = containerRuntime;
 		this.scannerPath = scannerPath;
 		this.localTokenSecret = hudson.util.Secret.fromString(localToken);
+		this.runtimeDirectory = runtimeDirectory;
 	}
 
 	/**
@@ -156,6 +158,10 @@ public class AquaDockerScannerBuilder extends Builder implements SimpleBuildStep
 		return showNegligible;
 	}
 
+	public String getRuntimeDirectory() {
+		return runtimeDirectory;
+	}
+
 	@CheckForNull
 	public String getTarFilePath() { return tarFilePath; }
 
@@ -197,6 +203,11 @@ public class AquaDockerScannerBuilder extends Builder implements SimpleBuildStep
 	@DataBoundSetter
 	public void setLocalToken(@CheckForNull String localToken) {
 		this.localToken = Util.fixNull(localToken);
+	}
+
+	@DataBoundSetter
+	public void setRuntimeDirectory(@CheckForNull String runtimeDirectory) {
+		this.runtimeDirectory = Util.fixNull(runtimeDirectory);
 	}
 
 	@Override
@@ -262,7 +273,7 @@ public class AquaDockerScannerBuilder extends Builder implements SimpleBuildStep
 		int exitCode = ScannerExecuter.execute(build, workspace,launcher, listener, artifactName, aquaScannerImage, apiURL, user,
 				password, token, timeout, runOptions, locationType, localImage, registry, register, hostedImage, hideBase,
 				showNegligible, onDisallowed == null || !onDisallowed.equals("fail"), notCompliesCmd, caCertificates,
-				policies, localTokenSecret, customFlags, tarFilePath, containerRuntime, scannerPath);
+				policies, localTokenSecret, customFlags, tarFilePath, containerRuntime, scannerPath, runtimeDirectory);
 		build.addAction(new AquaScannerAction(build, artifactSuffix, artifactName, displayImageName));
 
 		archiveArtifacts(build, workspace, launcher, listener);
