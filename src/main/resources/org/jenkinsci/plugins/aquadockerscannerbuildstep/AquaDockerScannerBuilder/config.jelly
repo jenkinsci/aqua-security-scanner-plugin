@@ -50,6 +50,9 @@
     <f:entry title="Register" field="register">
      <f:checkbox name="register"/>
     </f:entry>
+    <f:entry title="Podman socket directory (applicable to non-root users)" field="runtimeDirectory">
+        <f:textbox default=""  />
+    </f:entry>
    <f:entry title="Registry" field="registry">
      <f:textbox />
    </f:entry>
