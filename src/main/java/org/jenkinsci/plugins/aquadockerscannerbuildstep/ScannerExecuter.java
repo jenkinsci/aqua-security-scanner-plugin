@@ -26,7 +26,7 @@ public class ScannerExecuter {
 	public enum ImageLocation {
 		HOSTED,
 		LOCAL,
-		DOCKER_ARCHIVE
+		DOCKERARCHIVE
 	}
 
 	public static int execute(Run<?, ?> build, FilePath workspace, Launcher launcher, TaskListener listener, String artifactName,
@@ -91,7 +91,7 @@ public class ScannerExecuter {
 
 			// If scan is of dockerarchive with podman, we don't support it.
 			ImageLocation location = ImageLocation.valueOf(locationType.toUpperCase());
-			if(Objects.equals(location, ImageLocation.DOCKER_ARCHIVE) && !isDocker) {
+			if(Objects.equals(location, I"dockerarchive".equals("dockerarchive") && !isDocker) {
 				listener.getLogger().println("Podman is not supported with docker-archive");
 				System.exit(1);
 			}				
@@ -126,7 +126,7 @@ public class ScannerExecuter {
 					args.add("--register");
 				}
 				break;
-			case DOCKER_ARCHIVE:
+			case DOCKERARCHIVE:
 				args.addTokenized(runOptions);
 				
 				// extract file name from path for scan tagging
