@@ -91,7 +91,7 @@ public class ScannerExecuter {
 
 			// If scan is of dockerarchive with podman, we don't support it.
 			ImageLocation location = ImageLocation.valueOf(locationType.toUpperCase());
-			if(Objects.equals(location, I"dockerarchive".equals("dockerarchive") && !isDocker) {
+			if(Objects.equals(location, ImageLocation.DOCKERARCHIVE) && !isDocker) {
 				listener.getLogger().println("Podman is not supported with docker-archive");
 				System.exit(1);
 			}				
