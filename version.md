@@ -6,6 +6,15 @@ registries, for security vulnerabilities, using the API provided by
 
 ## Changelog:
 
+#### **Version 3.2.7 (Dec 11, 2024)**
+
+- Added rootless podman support to scan images using podman.
+- Added `Podman socket directory (applicable to non-root users)` in build job configurations which accepts runtime directory.
+
+#### **Version 3.2.6 (Sep 30, 2024)**
+
+- Added `Hide base image vulnerabilties` flag for all scan types in build job configurations.
+
 #### **Version 3.2.5 (Sep 14, 2023)**
 
 - Fix [SLK-69159] StringIndexOutOfBoundsException occuring inconsistently when scanning images.
