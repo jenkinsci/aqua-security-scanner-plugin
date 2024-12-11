@@ -8,6 +8,18 @@
     <f:entry title="Aqua scanner image" field="aquaScannerImage">
       <f:textbox />
     </f:entry>
+    <f:radioBlock checked="${instance.isRegistryAuthType('manualAuth') or true}" name="registryAuth" value="manualAuth" title="Manual authentication">
+    </f:radioBlock>
+    <f:radioBlock checked="${instance.isRegistryAuthType('pipelineAuth')}" name="registryAuth" value="pipelineAuth" title="Username/Password for authentication">
+      <f:nested>
+        <f:entry title="User" field="registryUsername">
+          <f:textbox />
+        </f:entry>
+        <f:entry title="Password" field="registryPassword">
+          <f:password />
+        </f:entry>
+      </f:nested>
+    </f:radioBlock>
     <f:entry title="Aqua API URL" field="apiURL">
       <f:textbox />
     </f:entry>
