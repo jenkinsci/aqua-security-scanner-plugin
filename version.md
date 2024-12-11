@@ -32,7 +32,7 @@ Happened because of we are not handling `String.substring()` properly, Now its h
 
 #### **Version 3.2.1 (Feb 25, 2022)**
 
--   Made localToken an optional field which accepts string value in pipeline syntax 
+-   Made localToken an optional field which accepts string value in pipeline syntax. 
 
 #### **Version 3.2 (Jan 19, 2022)**
 
