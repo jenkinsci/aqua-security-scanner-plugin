@@ -7,12 +7,16 @@ import hudson.util.Secret;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class AquaScannerRegistryLogin {
     private Launcher launcher;
     private TaskListener listener;
-    private int loginAttempts;
+    private int retryAttempts;
 
     public AquaScannerRegistryLogin(Launcher launcher, TaskListener listener) {
         this.launcher = launcher;
@@ -50,8 +54,7 @@ public class AquaScannerRegistryLogin {
     }
 
     private boolean registryLogin(String containerRuntime, String registryName, String userName, Secret password, int retries) {
-        loginAttempts += 1;
-        if (loginAttempts > retries) {
+        if (retryAttempts > retries) {
             return false;
         }
         Launcher.ProcStarter ps = launcher.launch();
@@ -76,19 +79,41 @@ public class AquaScannerRegistryLogin {
             }
         } catch (Exception e) {
             listener.getLogger().println("Failed registry login: " + e.toString());
+            retryAttempts += 1;
             return registryLogin(containerRuntime, registryName, userName, password, retries);
         }
     }
 
-    private static String getRegistryName(String imageName) {
-        // Check if the image name contains a registry (identified by the presence of '/')
-        if (imageName.contains("/")) {
-            String[] parts = imageName.split("/", 2); // Split the image name into registry/repository
-            // If the first part contains a dot (.) or a colon (:), it's a registry name
-            if (parts[0].contains(".") || parts[0].contains(":")) {
-                return parts[0];
+    private static final Pattern SHARegexp = Pattern.compile("^(?:([^/]+)/)([^@]+)(@sha256:[0-9a-f]+)$");
+    private static final Pattern SplitImageNameRegexp = Pattern.compile("^(?:([^/]+)/)?([^:]+)(?::(.*))?$");
+    private static final Pattern PortRegexp = Pattern.compile(":\\d+$");
+
+    public String getRegistryName(String imageName) {
+        String registry = "";
+
+        if (imageName == null || imageName.isEmpty()) {
+            return registry;
+        }
+
+        Matcher shaMatcher = SHARegexp.matcher(imageName);
+        if (shaMatcher.matches() && shaMatcher.groupCount() == 3) {
+            registry = shaMatcher.group(1);
+        } else {
+            Matcher nameMatcher = SplitImageNameRegexp.matcher(imageName);
+            if (nameMatcher.matches() && nameMatcher.groupCount() >= 3) {
+                registry = nameMatcher.group(1);
             }
         }
-        return "docker.io";
+
+        // DNS/IP validation of registry
+        if (!registry.isEmpty() && !PortRegexp.matcher(registry).matches()) {
+            try {
+                InetAddress.getByName(registry);
+            } catch (UnknownHostException e) {
+                listener.getLogger().println("Warning: unable to validate DNS/IP of registry: " + registry);
+            }
+        }
+
+        return registry;
     }
 }
