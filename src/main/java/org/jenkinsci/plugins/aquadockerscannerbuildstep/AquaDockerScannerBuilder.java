@@ -222,6 +222,7 @@ public class AquaDockerScannerBuilder extends Builder implements SimpleBuildStep
 		String user = getDescriptor().getUser();
 		Secret password = getDescriptor().getPassword();
 		Secret token = getDescriptor().getToken();
+		String registryAuthType = getDescriptor().getRegistryAuthType();
 
 		// If user and password is empty, check if token is provided as global or local value
 		if(("").equals(user) && Secret.toString(password).equals("") && 
@@ -271,10 +272,12 @@ public class AquaDockerScannerBuilder extends Builder implements SimpleBuildStep
 			default:
 				displayImageName = "";	
 		}
-		boolean loginSuccess = new AquaScannerRegistryLogin(launcher, listener)
-				.checkAndPerformRegistryLogin(containerRuntime, aquaScannerImage, registryUsername, registryPassword);
-		if (!loginSuccess) {
-			throw new AbortException("Registry login failed.");
+		if (registryAuthType != null && registryAuthType.equals("pipelineAuth")) {
+			boolean loginSuccess = new AquaScannerRegistryLogin(launcher, listener)
+					.checkAndPerformRegistryLogin(containerRuntime, aquaScannerImage, registryUsername, registryPassword);
+			if (!loginSuccess) {
+				throw new AbortException("Registry login failed.");
+			}
 		}
 		int exitCode = ScannerExecuter.execute(build, workspace,launcher, listener, artifactName, aquaScannerImage, apiURL, user,
 				password, token, timeout, runOptions, locationType, localImage, registry, register, hostedImage, hideBase,
