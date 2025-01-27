@@ -272,7 +272,10 @@ public class AquaDockerScannerBuilder extends Builder implements SimpleBuildStep
 			default:
 				displayImageName = "";	
 		}
-		if (registryAuthType != null && registryAuthType.equals("pipelineAuth")) {
+		if (
+				registryAuthType != null && registryAuthType.equals("pipelineAuth")
+				&& (containerRuntime == null || containerRuntime.isEmpty() || containerRuntime.equals("docker") || containerRuntime.equals("podman"))
+		) {
 			boolean loginSuccess = new AquaScannerRegistryLogin(launcher, listener)
 					.checkAndPerformRegistryLogin(containerRuntime, aquaScannerImage, registryUsername, registryPassword);
 			if (!loginSuccess) {
