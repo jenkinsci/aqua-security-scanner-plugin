@@ -8,11 +8,11 @@
     <f:entry title="Aqua scanner image" field="aquaScannerImage">
       <f:textbox />
     </f:entry>
-    <f:radioBlock checked="${instance.isRegistryAuthType('manualAuth') or true}" name="registryAuth" value="manualAuth" title="Manual authentication">
+    <f:radioBlock checked="${instance.isRegistryAuthType('manualAuth') or true}" name="registryAuth" value="manualAuth" title="Manual authentication to the registry hosting scanner image"  help="/plugin/aqua-security-scanner/help-registryManualAuthentication.html">
     </f:radioBlock>
-    <f:radioBlock checked="${instance.isRegistryAuthType('pipelineAuth')}" name="registryAuth" value="pipelineAuth" title="Username/Password for authentication">
+    <f:radioBlock checked="${instance.isRegistryAuthType('pipelineAuth')}" name="registryAuth" value="pipelineAuth" title="Username/Password for authentication to the registry hosting scanner image">
       <f:nested>
-        <f:entry title="User" field="registryUsername">
+        <f:entry title="Username" field="registryUsername">
           <f:textbox />
         </f:entry>
         <f:entry title="Password" field="registryPassword">
@@ -20,12 +20,12 @@
         </f:entry>
       </f:nested>
     </f:radioBlock>
-    <f:entry title="Aqua API URL" field="apiURL">
+    <f:entry title="Aqua Server URL" field="apiURL">
       <f:textbox />
     </f:entry>
-    <f:radioBlock checked="${instance.isAuthType('uname') or true}" name="auth" value="uname" title="Username/Password for authentication">
+    <f:radioBlock checked="${instance.isAuthType('uname') or true}" name="auth" value="uname" title="Username/Password for authentication to the Aqua Server">
      <f:nested>
-        <f:entry title="User" field="user">
+        <f:entry title="Username" field="user">
           <f:textbox />
         </f:entry>
         <f:entry title="Password" field="password">
@@ -33,7 +33,7 @@
         </f:entry>
       </f:nested>
     </f:radioBlock>
-    <f:radioBlock checked="${instance.isAuthType('token')}" name="auth" value="token" title="Token for authentication">
+    <f:radioBlock checked="${instance.isAuthType('token')}" name="auth" value="token" title="Token for authentication to the Aqua Server">
       <f:nested>
         <f:entry title="Token" field="token">
           <f:password />
