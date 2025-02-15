@@ -1,6 +1,9 @@
 package org.jenkinsci.plugins.aquadockerscannerbuildstep;
 
-import hudson.*;
+import hudson.AbortException;
+import hudson.EnvVars;
+import hudson.FilePath;
+import hudson.Launcher;
 import hudson.Launcher;
 import hudson.util.ArgumentListBuilder;
 import java.io.File;
