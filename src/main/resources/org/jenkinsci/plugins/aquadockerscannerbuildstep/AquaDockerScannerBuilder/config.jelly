@@ -7,11 +7,11 @@
   -->
 
    <f:block>
-     <b>When image doesn’t comply with Aqua policy:</b>
+     <b>When an image does not comply with Aqua Image Assurance Policies:</b>
    </f:block>
    <f:radioBlock checked="${instance.isOnDisallowed('ignore') or true}" name="onDisallowed" value="ignore" title="Never fail builds" inline="true" help="/plugin/aqua-security-scanner/help-logAndIgnore.html">
    </f:radioBlock>
-   <f:radioBlock checked="${instance.isOnDisallowed('fail')}" name="onDisallowed" value="fail" title="Perform the action defined in Aqua’s policy" inline="true" help="/plugin/aqua-security-scanner/help-buildFails.html">
+   <f:radioBlock checked="${instance.isOnDisallowed('fail')}" name="onDisallowed" value="fail" title="Perform the action defined in Aqua Image Assurance Policies" inline="true" help="/plugin/aqua-security-scanner/help-aquaImageAssurancePolicies.html">
       <f:entry title="Shell command to execute when no compliance" field="notCompliesCmd">
 	<f:textbox />
       </f:entry>
@@ -37,7 +37,7 @@
       </f:entry>
    </f:radioBlock>
    <f:radioBlock checked="${instance.isLocationType('dockerarchive')}" name="locationType" value="dockerarchive" title="docker-archive" inline="true" help="/plugin/aqua-security-scanner/help-isdockerarchive.html">
-     <f:entry title="Tar file path" field="tarFilePath" help="/plugin/aqua-security-scanner/help-buildFails.html">
+     <f:entry title="Tar file path" field="tarFilePath">
    	   <f:textbox />
      </f:entry>
    </f:radioBlock>
