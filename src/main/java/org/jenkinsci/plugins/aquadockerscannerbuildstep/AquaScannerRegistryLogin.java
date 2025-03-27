@@ -7,6 +7,7 @@ import hudson.util.Secret;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
@@ -25,43 +26,28 @@ public class AquaScannerRegistryLogin {
 
 
     public boolean checkAndPerformRegistryLogin(String containerRuntime, String imageName, String username, Secret password) {
-        Launcher.ProcStarter ps = launcher.launch();
-        ArgumentListBuilder args = new ArgumentListBuilder();
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        args.add(containerRuntime != null && containerRuntime.equals("podman") ? "podman" : "docker");
-        args.add("inspect", "--format='{{.RepoTags}}'", imageName);
-        ps.cmds(args).stdin(null).stderr(outputStream).stdout(outputStream);
-        try {
-            int exitCode = ps.join(); // RUN !
-            String result = outputStream.toString(StandardCharsets.UTF_8.name()).trim();
-
-            if (exitCode == 0 && !result.isEmpty()) {
-                // result is non-empty and exitCode is 0 indicates that image inspect worked fine, so should return loginStatus:true
-                return true;
-            } else if (!username.isEmpty()) {
-                // non-empty username indicates that credentials are configured for scanner-registry at jenkins-system-config.
-                // action: perform docker-login with credentials and return as loginStatus.
-                return registryLogin(containerRuntime, getRegistryName(imageName), username, password, 1);
-            } else {
-                // If none of above conditions match, return loginStatus: true which will not block existing behaviour
-                // As backward compatibility, we should allow this case.
-                return true;
-            }
-        } catch (Exception e) {
-            listener.getLogger().println(e.toString());
-            return false;
+        String runtime = resolveContainerRuntime(containerRuntime);
+        if (imageExists(runtime, imageName)) {
+            return true;
+        } else if (!username.isEmpty()) {
+            // non-empty username indicates that credentials are configured for scanner-registry at jenkins-system-config.
+            // action: perform docker-login with credentials and return as loginStatus.
+            return registryLogin(runtime, getRegistryName(imageName), username, password, 1);
+        } else {
+            // If none of above conditions match, return loginStatus: true which will not block existing behaviour
+            // As backward compatibility, we should allow this case.
+            return true;
         }
     }
 
-    private boolean registryLogin(String containerRuntime, String registryName, String userName, Secret password, int retries) {
-        if (retryAttempts > retries) {
+    private boolean registryLogin(String containerRuntime, String registryName, String userName, Secret password, int maxRetries) {
+        if (retryAttempts > maxRetries) {
             return false;
         }
         Launcher.ProcStarter ps = launcher.launch();
         ArgumentListBuilder args = new ArgumentListBuilder();
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        args.add(containerRuntime != null && containerRuntime.equals("podman") ? "podman" : "docker");
-        args.add("login", registryName);
+        args.add(containerRuntime, "login", registryName);
         args.add("-u").addMasked(userName);
         args.add("--password-stdin");
         ps.cmds(args).stdin(new ByteArrayInputStream((password.getPlainText() + "\n").getBytes(StandardCharsets.UTF_8)))
@@ -78,9 +64,9 @@ public class AquaScannerRegistryLogin {
                 return true;
             }
         } catch (Exception e) {
-            listener.getLogger().println("Failed registry login: " + e.toString());
+            listener.getLogger().println("Registry login failed: " + e.getMessage());
             retryAttempts += 1;
-            return registryLogin(containerRuntime, registryName, userName, password, retries);
+            return registryLogin(containerRuntime, registryName, userName, password, maxRetries);
         }
     }
 
@@ -115,5 +101,29 @@ public class AquaScannerRegistryLogin {
         }
 
         return registry;
+    }
+
+    private boolean imageExists(String containerRuntime, String imageName) {
+        ArgumentListBuilder args = new ArgumentListBuilder();
+        args.add(containerRuntime, "inspect", "--format={{.RepoTags}}", imageName);
+
+        try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
+            int exitCode = launcher.launch()
+                    .cmds(args)
+                    .stdin(null)
+                    .stderr(outputStream)
+                    .stdout(outputStream)
+                    .join();
+
+            // result is non-empty and exitCode is 0 indicates that image inspect worked fine, so should return loginStatus:true
+            return exitCode == 0 && !outputStream.toString(StandardCharsets.UTF_8.name()).trim().isEmpty();
+        } catch (Exception e) {
+            listener.getLogger().println("Error checking image existence: " + e.getMessage());
+            return false;
+        }
+    }
+
+    private String resolveContainerRuntime(String containerRuntime) {
+        return "podman".equals(containerRuntime) ? "podman" : "docker";
     }
 }

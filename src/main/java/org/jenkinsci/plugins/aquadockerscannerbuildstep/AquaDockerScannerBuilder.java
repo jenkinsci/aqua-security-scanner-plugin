@@ -92,7 +92,7 @@ public class AquaDockerScannerBuilder extends Builder implements SimpleBuildStep
 		this.containerRuntime = containerRuntime;
 		this.scannerPath = scannerPath;
 		this.localTokenSecret = hudson.util.Secret.fromString(localToken);
-		this.runtimeDirectory = runtimeDirectory;
+		this.runtimeDirectory = Util.fixNull(runtimeDirectory);
 	}
 
 	/**
