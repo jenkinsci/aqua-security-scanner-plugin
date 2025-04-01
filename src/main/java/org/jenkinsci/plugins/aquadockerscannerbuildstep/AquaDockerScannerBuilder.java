@@ -3,7 +3,6 @@ package org.jenkinsci.plugins.aquadockerscannerbuildstep;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import hudson.*;
 import hudson.util.FormValidation;
-import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.tasks.Builder;
 //import hudson.model.BuildListener;
