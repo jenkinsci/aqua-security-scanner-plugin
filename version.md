@@ -6,6 +6,12 @@ registries, for security vulnerabilities, using the API provided by
 
 ## Changelog:
 
+#### **Version 3.2.8 (Apr 1, 2025)**
+
+The image scanning now includes two options for Aqua registry authentication to pull the scanner image:
+- **Manual authentication to the registry hosting scanner image:** Perform manual authentication during the build process 
+- **Username/Password for authentication to the registry hosting scanner image:** Enter the username and password of the registry hosting scanner image
+
 #### **Version 3.2.7 (Dec 11, 2024)**
 
 - Added rootless podman support to scan images using podman.
