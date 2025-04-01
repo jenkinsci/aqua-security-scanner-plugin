@@ -92,7 +92,7 @@ public class AquaDockerScannerBuilder extends Builder implements SimpleBuildStep
 		this.containerRuntime = containerRuntime;
 		this.scannerPath = scannerPath;
 		this.localTokenSecret = hudson.util.Secret.fromString(localToken);
-		this.runtimeDirectory = runtimeDirectory;
+		this.runtimeDirectory = Util.fixNull(runtimeDirectory);
 	}
 
 	/**
@@ -216,10 +216,13 @@ public class AquaDockerScannerBuilder extends Builder implements SimpleBuildStep
 		// This is where you 'build' the project.
 
 		String aquaScannerImage = getDescriptor().getAquaScannerImage();
+		String registryUsername = getDescriptor().getRegistryUsername();
+		Secret registryPassword = getDescriptor().getRegistryPassword();
 		String apiURL = getDescriptor().getApiURL();
 		String user = getDescriptor().getUser();
 		Secret password = getDescriptor().getPassword();
 		Secret token = getDescriptor().getToken();
+		String registryAuthType = getDescriptor().getRegistryAuthType();
 
 		// If user and password is empty, check if token is provided as global or local value
 		if(("").equals(user) && Secret.toString(password).equals("") && 
@@ -268,8 +271,17 @@ public class AquaDockerScannerBuilder extends Builder implements SimpleBuildStep
 				break;
 			default:
 				displayImageName = "";	
-		}	
-		
+		}
+		if (
+				registryAuthType != null && registryAuthType.equals("pipelineAuth")
+				&& (containerRuntime == null || containerRuntime.isEmpty() || containerRuntime.equals("docker") || containerRuntime.equals("podman"))
+		) {
+			boolean loginSuccess = new AquaScannerRegistryLogin(launcher, listener)
+					.checkAndPerformRegistryLogin(containerRuntime, aquaScannerImage, registryUsername, registryPassword);
+			if (!loginSuccess) {
+				throw new AbortException("Registry login failed.");
+			}
+		}
 		int exitCode = ScannerExecuter.execute(build, workspace,launcher, listener, artifactName, aquaScannerImage, apiURL, user,
 				password, token, timeout, runOptions, locationType, localImage, registry, register, hostedImage, hideBase,
 				showNegligible, onDisallowed == null || !onDisallowed.equals("fail"), notCompliesCmd, caCertificates,
@@ -333,6 +345,9 @@ public class AquaDockerScannerBuilder extends Builder implements SimpleBuildStep
 		 * call save().
 		 */
 		private String aquaScannerImage;
+		private Secret registryUsername;
+		private Secret registryPassword;
+		private String registryAuthType;
 		private Secret apiURL;
 		private String authval;
 		private Secret user;
@@ -387,7 +402,9 @@ public class AquaDockerScannerBuilder extends Builder implements SimpleBuildStep
 			aquaScannerImage = formData.getString("aquaScannerImage");
 			apiURL = Secret.fromString(formData.getString("apiURL"));
 			JSONObject authForm = formData.getJSONObject("auth");
+			JSONObject registryAuthForm = formData.getJSONObject("registryAuth");
 			authval = authForm.getString("value") ;
+			registryAuthType = registryAuthForm.getString("value");
 
 			try{		
 				if (authval.equals("token")){
@@ -399,7 +416,13 @@ public class AquaDockerScannerBuilder extends Builder implements SimpleBuildStep
 					password = Secret.fromString(authForm.getString("password"));
 					token = Secret.fromString("");
 				}
-				
+				if (registryAuthType.equals("pipelineAuth")) {
+					registryUsername = Secret.fromString(registryAuthForm.getString("registryUsername"));
+					registryPassword = Secret.fromString(registryAuthForm.getString("registryPassword"));
+				} else {
+					registryUsername = null;
+					registryPassword = null;
+				}
 			}catch (net.sf.json.JSONException te){
 				throw new FormException("Either Username/PWD or token must be set. Error is "+ te.getMessage(), "auth");
 			}
@@ -421,6 +444,14 @@ public class AquaDockerScannerBuilder extends Builder implements SimpleBuildStep
 
 		public String getApiURL() {
 			return Secret.toString(apiURL);
+		}
+
+		public String getRegistryUsername() { return Secret.toString(registryUsername); }
+
+		public Secret getRegistryPassword() { return registryPassword; }
+
+		public String getRegistryAuthType() {
+			return registryAuthType;
 		}
 
 		public String getAuthVal() {
@@ -455,6 +486,14 @@ public class AquaDockerScannerBuilder extends Builder implements SimpleBuildStep
 				return "uname".equals(auth) ? "true" : "false";
 			} else {
 				return getAuthVal().equals(auth) ? "true" : "false";
+			}
+		}
+
+		public String isRegistryAuthType(String auth) {
+			if (getRegistryAuthType() == null) {
+				return "manualAuth".equals(auth) ? "true" : "false";
+			} else {
+				return getRegistryAuthType().equals(auth) ? "true" : "false";
 			}
 		}
 
