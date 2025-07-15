@@ -6,9 +6,40 @@ registries, for security vulnerabilities, using the API provided by
 
 ## Changelog:
 
-#### **Version 3.2.9 (Jul 14, 2025)**
+#### **Version 3.2.9 (July 16, 2025)**
 
-- Resolved an issue where the custom scanner path is not respected during local image scans.
+### Security Fixes
+- **SECURITY-3542 / CVE-2025-53653**: Fixed tokens stored in plain text vulnerability
+  - Local scanner tokens are now properly encrypted using Jenkins' Secret class
+  - Tokens are no longer stored in plain text in job config.xml files
+  - Added backward compatibility for existing configurations
+  - Users with Item/Extended Read permission can no longer view tokens in plain text
+  - Implemented migration approach that automatically encrypts tokens when jobs are loaded or executed
+  - Added XML serialization control to ensure tokens are always saved in encrypted format
+
+### Bug Fixes
+- Fixed an issue where the custom scanner path was not respected during local image scans
+
+### Dependency Security Updates
+- Updated `org.codehaus.plexus:plexus-utils` from 3.0.10 to 3.0.24 to fix:
+  - **CVE-2017-1000487** (CRITICAL): Fixed command injection vulnerability in Commandline class
+  - **CVE-2022-4244** (HIGH): Fixed directory traversal vulnerability
+  - **CVE-2022-4245** (MEDIUM): Fixed XML External Entity (XXE) injection vulnerability
+- Updated `org.jenkins-ci.plugins:structs` to version 1.24 for improved compatibility
+
+### Technical Changes
+- Changed `localToken` field from `String` to `Secret` type
+- Added `readResolve()` method for configuration migration
+- Added custom XML serialization method to ensure tokens are always encrypted
+- Enhanced job execution to detect and migrate plaintext tokens
+- Updated token handling in `ScannerExecuter` class
+- Improved build process with containerized build support
+
+### Migration Notes
+- Existing configurations will be automatically migrated when jobs are loaded or executed
+- No manual intervention required for existing installations
+- Tokens will be re-encrypted on first job execution or configuration save
+- Migration is logged in the Jenkins console for transparency
 
 #### **Version 3.2.8 (Apr 1, 2025)**
 

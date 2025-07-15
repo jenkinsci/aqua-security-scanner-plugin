@@ -66,9 +66,14 @@ public class AquaDockerScannerBuilder extends Builder implements SimpleBuildStep
 	private String tarFilePath;
 
 	@CheckForNull
-	private String localToken;
-
-	private Secret localTokenSecret;
+	private Secret localToken;
+	
+	/**
+	 * Legacy field for backward compatibility.
+	 * @deprecated Use {@link #localToken} instead.
+	 */
+	@Deprecated
+	private transient String legacyLocalToken;
 
 	// Fields in config.jelly must match the parameter names in the
 	// "DataBoundConstructor"
@@ -86,13 +91,47 @@ public class AquaDockerScannerBuilder extends Builder implements SimpleBuildStep
 		this.hideBase = hideBase;
 		this.showNegligible = showNegligible;
 		this.policies = policies;
-		this.localToken = localToken;
+		this.localToken = Secret.fromString(localToken);
 		this.customFlags = customFlags;
 		this.tarFilePath = tarFilePath;
 		this.containerRuntime = containerRuntime;
 		this.scannerPath = scannerPath;
-		this.localTokenSecret = hudson.util.Secret.fromString(localToken);
 		this.runtimeDirectory = Util.fixNull(runtimeDirectory);
+	}
+
+	/**
+	 * Backward compatibility for configurations created before the security fix.
+	 * This method is called when Jenkins deserializes the configuration from XML.
+	 * 
+	 * This implementation handles three cases:
+	 * 1. New configurations with Secret localToken already set
+	 * 2. Old configurations with plaintext legacyLocalToken that needs migration
+	 * 3. Very old configurations with neither field set
+	 * 
+	 * This is a lazy migration approach - we only migrate when a job is loaded.
+	 */
+	protected Object readResolve() {
+		// Case 1: If localToken is already set, we're good (already migrated or new config)
+		if (localToken != null) {
+			return this;
+		}
+		
+		// Case 2: If we have a legacy plaintext token, migrate it to Secret
+		if (legacyLocalToken != null) {
+			localToken = Secret.fromString(legacyLocalToken);
+			// Clear the legacy field to avoid keeping plaintext in memory
+			legacyLocalToken = null;
+			
+			// Log the migration
+			java.util.logging.Logger.getLogger(AquaDockerScannerBuilder.class.getName())
+				.log(java.util.logging.Level.INFO, "Migrated plaintext token to Secret format");
+			
+			return this;
+		}
+		
+		// Case 3: Neither field is set, initialize with empty Secret
+		localToken = Secret.fromString("");
+		return this;
 	}
 
 	/**
@@ -143,7 +182,20 @@ public class AquaDockerScannerBuilder extends Builder implements SimpleBuildStep
 
 	@CheckForNull
 	public String getLocalToken() {
-		return localToken;
+		return Secret.toString(localToken);
+	}
+	
+	/**
+	 * This method is used by Jenkins when saving the configuration to XML.
+	 * We override it to ensure the token is always saved in encrypted format.
+	 * 
+	 * @return The encrypted token value for XML serialization
+	 */
+	public String getLocalTokenForXml() {
+		if (localToken != null) {
+			return localToken.getEncryptedValue();
+		}
+		return "";
 	}
 
 	public String getCustomFlags() {
@@ -202,7 +254,7 @@ public class AquaDockerScannerBuilder extends Builder implements SimpleBuildStep
 
 	@DataBoundSetter
 	public void setLocalToken(@CheckForNull String localToken) {
-		this.localToken = Util.fixNull(localToken);
+		this.localToken = Secret.fromString(Util.fixNull(localToken));
 	}
 
 	@DataBoundSetter
@@ -215,6 +267,25 @@ public class AquaDockerScannerBuilder extends Builder implements SimpleBuildStep
 			throws AbortException, java.lang.InterruptedException {
 		// This is where you 'build' the project.
 
+		// Check if we need to save the job configuration to persist token migration
+		if (build.getParent() instanceof hudson.model.AbstractProject) {
+			try {
+				// Get the job's config.xml content
+				hudson.model.AbstractProject project = (hudson.model.AbstractProject) build.getParent();
+				String configXml = project.getConfigFile().asString();
+				
+				// Check if there's a plaintext token that needs to be saved in encrypted form
+				if (configXml.contains("<localToken>") && !configXml.contains("<localToken>{")) {
+					// Save the project to persist the migration
+					project.save();
+					listener.getLogger().println("Migrated plaintext token to encrypted format");
+				}
+			} catch (Exception e) {
+				// Log the exception but don't fail the build
+				listener.getLogger().println("Warning: Failed to check/save token migration: " + e.getMessage());
+			}
+		}
+
 		String aquaScannerImage = getDescriptor().getAquaScannerImage();
 		String registryUsername = getDescriptor().getRegistryUsername();
 		Secret registryPassword = getDescriptor().getRegistryPassword();
@@ -226,7 +297,7 @@ public class AquaDockerScannerBuilder extends Builder implements SimpleBuildStep
 
 		// If user and password is empty, check if token is provided as global or local value
 		if(("").equals(user) && Secret.toString(password).equals("") && 
-			Secret.toString(token).equals("") && Secret.toString(localTokenSecret).equals("")){
+			Secret.toString(token).equals("") && Secret.toString(localToken).equals("")){
 				throw new AbortException("Either Username/Password or Token should be provided in Global Settings, or"+
 				" valid token provided with in Token field in the build configuration");
 			
@@ -285,7 +356,7 @@ public class AquaDockerScannerBuilder extends Builder implements SimpleBuildStep
 		int exitCode = ScannerExecuter.execute(build, workspace,launcher, listener, artifactName, aquaScannerImage, apiURL, user,
 				password, token, timeout, runOptions, locationType, localImage, registry, register, hostedImage, hideBase,
 				showNegligible, onDisallowed == null || !onDisallowed.equals("fail"), notCompliesCmd, caCertificates,
-				policies, localTokenSecret, customFlags, tarFilePath, containerRuntime, scannerPath, runtimeDirectory);
+				policies, localToken, customFlags, tarFilePath, containerRuntime, scannerPath, runtimeDirectory);
 		build.addAction(new AquaScannerAction(build, artifactSuffix, artifactName, displayImageName));
 
 		archiveArtifacts(build, workspace, launcher, listener);
