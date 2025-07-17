@@ -107,10 +107,14 @@ public class ScannerExecuter {
 				}
 				break;
 			case LOCAL:
+				if(!"".equals(scannerPath) && !isDocker) {
+					args.add("-v", scannerPath+":/aquasec/scannercli:Z", "--entrypoint=/aquasec/scannercli");
+				}
+
 				if(!isDocker && runtimeDirectory.isEmpty()) {
 					args.addTokenized(runOptions);
 				}
-				
+
 				if(isDocker){
 					args.add("--rm", "-v", "/var/run/docker.sock:/var/run/docker.sock", aquaScannerImage, "scan", "--host", apiURL, "--local", localImage);	
 				} else {

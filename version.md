@@ -6,6 +6,10 @@ registries, for security vulnerabilities, using the API provided by
 
 ## Changelog:
 
+#### **Version 3.2.9 (Jul 14, 2025)**
+
+- Resolved an issue where the custom scanner path is not respected during local image scans.
+
 #### **Version 3.2.8 (Apr 1, 2025)**
 
 The image scanning now includes two options for Aqua registry authentication to pull the scanner image:
