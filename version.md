@@ -6,6 +6,20 @@ registries, for security vulnerabilities, using the API provided by
 
 ## Changelog:
 
+#### **Version 3.2.10 (August 6, 2025)**
+
+### Security Fixes
+- **Correction for SECURITY-3542 / CVE-2025-53653**: This release refines the implementation for local scanner token encryption to fully align with Jenkins security best practices.
+- **Rationale**:
+  - The previous fix introduced the `Secret` type but could still expose the encrypted token value in the `config.xml` under certain circumstances.
+  - This change ensures the token is handled more securely by the Jenkins framework, preventing this potential information disclosure and strengthening the migration path for legacy plaintext tokens.
+
+### Technical Changes
+- Removed the custom `getLocalTokenForXml()` method in favor of a standard `getLocalToken()` getter that returns a `Secret` object.
+- Simplified and corrected the `readResolve()` method to ensure proper lazy migration of legacy plaintext tokens.
+- Updated `config.jelly` to remove the unnecessary hidden field and bind directly to the `Secret` field.
+
+
 #### **Version 3.2.9 (July 16, 2025)**
 
 ### Security Fixes
