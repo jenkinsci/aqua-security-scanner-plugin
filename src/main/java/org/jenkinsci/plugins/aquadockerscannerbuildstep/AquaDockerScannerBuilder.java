@@ -67,13 +67,6 @@ public class AquaDockerScannerBuilder extends Builder implements SimpleBuildStep
 
 	@CheckForNull
 	private Secret localToken;
-	
-	/**
-	 * Legacy field for backward compatibility.
-	 * @deprecated Use {@link #localToken} instead.
-	 */
-	@Deprecated
-	private transient String legacyLocalToken;
 
 	// Fields in config.jelly must match the parameter names in the
 	// "DataBoundConstructor"
@@ -91,7 +84,7 @@ public class AquaDockerScannerBuilder extends Builder implements SimpleBuildStep
 		this.hideBase = hideBase;
 		this.showNegligible = showNegligible;
 		this.policies = policies;
-		this.localToken = Secret.fromString(localToken);
+		setLocalToken(localToken);
 		this.customFlags = customFlags;
 		this.tarFilePath = tarFilePath;
 		this.containerRuntime = containerRuntime;
@@ -102,35 +95,12 @@ public class AquaDockerScannerBuilder extends Builder implements SimpleBuildStep
 	/**
 	 * Backward compatibility for configurations created before the security fix.
 	 * This method is called when Jenkins deserializes the configuration from XML.
-	 * 
-	 * This implementation handles three cases:
-	 * 1. New configurations with Secret localToken already set
-	 * 2. Old configurations with plaintext legacyLocalToken that needs migration
-	 * 3. Very old configurations with neither field set
-	 * 
-	 * This is a lazy migration approach - we only migrate when a job is loaded.
 	 */
+	@SuppressWarnings("deprecation")
 	protected Object readResolve() {
-		// Case 1: If localToken is already set, we're good (already migrated or new config)
-		if (localToken != null) {
-			return this;
+		if (localToken == null) {
+			localToken = Secret.fromString("");
 		}
-		
-		// Case 2: If we have a legacy plaintext token, migrate it to Secret
-		if (legacyLocalToken != null) {
-			localToken = Secret.fromString(legacyLocalToken);
-			// Clear the legacy field to avoid keeping plaintext in memory
-			legacyLocalToken = null;
-			
-			// Log the migration
-			java.util.logging.Logger.getLogger(AquaDockerScannerBuilder.class.getName())
-				.log(java.util.logging.Level.INFO, "Migrated plaintext token to Secret format");
-			
-			return this;
-		}
-		
-		// Case 3: Neither field is set, initialize with empty Secret
-		localToken = Secret.fromString("");
 		return this;
 	}
 
@@ -180,22 +150,8 @@ public class AquaDockerScannerBuilder extends Builder implements SimpleBuildStep
 		return policies;
 	}
 
-	@CheckForNull
-	public String getLocalToken() {
-		return Secret.toString(localToken);
-	}
-	
-	/**
-	 * This method is used by Jenkins when saving the configuration to XML.
-	 * We override it to ensure the token is always saved in encrypted format.
-	 * 
-	 * @return The encrypted token value for XML serialization
-	 */
-	public String getLocalTokenForXml() {
-		if (localToken != null) {
-			return localToken.getEncryptedValue();
-		}
-		return "";
+	public Secret getLocalToken() {
+		return localToken;
 	}
 
 	public String getCustomFlags() {
