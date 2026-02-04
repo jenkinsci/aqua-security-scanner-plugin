@@ -15,7 +15,7 @@ import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.QueryParameter;
 
-import javax.annotation.CheckForNull;
+import edu.umd.cs.findbugs.annotations.CheckForNull;
 import javax.servlet.ServletException;
 import java.io.IOException;
 import java.util.logging.Level;
@@ -332,7 +332,6 @@ public class AquaDockerScannerBuilder extends Builder implements SimpleBuildStep
 	}
 
 	// Archive scanout artifact
-	@SuppressFBWarnings("NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE") // No idea why this is needed
 	private void archiveArtifacts(Run<?, ?> build, FilePath workspace, Launcher launcher, TaskListener listener)
 			throws java.lang.InterruptedException {
 		try {
