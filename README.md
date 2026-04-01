@@ -1,71 +1,97 @@
 # Aqua Security Scanner Jenkins Plugin #
 
-This is a Jenkins plugin for calling the Aqua API to scan a Docker image
+This is a Jenkins plugin for calling the Aqua API to scan a Docker image.
 
-## Prerequisites for the plugin to be operational ##
+## Requirements ##
 
-1. Docker must be installed on the same machine Jenkins is installed in because the scanner itself is deployed via a Docker container.
-2. The *jenkins* user must be added to the *docker* group so it has permission to run Docker:
- 
-     ```
-     sudo usermod -aG docker jenkins
-     ```
-     
-3. Ensure Aqua's scanner-cli image exists on this machine, you will need permission for the following because the image is not public.
- 
-     ```
-     sudo docker pull <full name of Aqua's scanner image>
-     ```
-     
+- **Jenkins**: 2.440.3 or later (tested up to 2.541.3 LTS)
+- **Java**: 11 or later (tested with JDK 17 and JDK 21)
+- **Docker** or **Podman** installed on the Jenkins machine
+- The *jenkins* user must be in the *docker* group:
+  ```
+  sudo usermod -aG docker jenkins
+  ```
 
-## Usage of plugin in Jenkins ##
-* In the global configuration page ("Manage Jenkins"/"Configure System") in the section for this plugin, enter values for the Aqua API url, the user name, the password and a timeout value in seconds. The build step will fail if scanning does not terminate within the timeout value. A value of 0 will cause the default timeout value, 300 seconds, to be used.
-* In the configuration page for your project, add an "Aqua Security" step from the "Add build step" dropdown list. Choose between a local image or a hosted image. Enter the image path (including the tag) of the image that is to be scanned, and in the case of a hosted image, also enter the registry name. These values can be entered with $VARIABLE syntax on environment variables.
-* When run successfully, an artifact named "scanout.html" will be created in the project's workspace. If more than one "Aqua Security" step is added to a build, the additional artifact will be suffixed with consecutive numbers.
+## Configuration as Code (CasC) ##
 
-## Building the plugin (instructions for Ubuntu)##
+The plugin supports [Jenkins Configuration as Code](https://plugins.jenkins.io/configuration-as-code/). Add the following to your `jenkins.yaml`:
 
-* If JDK 7 is not installed, install it
+```yaml
+unclassified:
+  aqua:
+    aquaScannerImage: "registry.aquasec.com/scanner:2022.4"
+    apiURL: "https://your-aqua-server.com"
+    # Leave user empty to use password as a token
+    user: ""
+    password: "your-token-or-password"
+    timeout: 300
+    runOptions: ""
+    caCertificates: false
+    registryUsername: "registry-user"
+    registryPassword: "registry-password"
 ```
-     sudo apt-get update
-     sudo apt-get install openjdk-7-jdk
+
+Environment variable substitution is supported: `"${AQUA_API_URL}"`.
+
+**Authentication**: Set `user` and `password` for username/password auth. Leave `user` empty to use `password` as an API token.
+
+**Registry credentials**: If `registryUsername` is set, the plugin will automatically log in to the scanner image registry before pulling.
+
+## Manual Configuration ##
+
+In the global configuration page ("Manage Jenkins" / "Configure System"), in the "Aqua Security" section, enter the Aqua API URL, credentials, scanner image, and timeout.
+
+In the configuration page for your project, add an "Aqua Security" step from the "Add build step" dropdown. Choose between a local image, hosted image, or docker archive. Enter the image path including tag. Values support `$VARIABLE` syntax for environment variables.
+
+### Pipeline Usage ###
+
+```groovy
+aqua customFlags: '',
+     hideBase: false,
+     hostedImage: '',
+     localImage: 'my-app:latest',
+     locationType: 'local',
+     notCompliesCmd: '',
+     onDisallowed: 'ignore',
+     policies: '',
+     register: false,
+     registry: '',
+     showNegligible: true
 ```
 
-* Installing Maven3 (must be 3)
- *   On Ubuntu 14.04
- ```
-      sudo add-apt-repository ppa:natecarlson/maven3
-      sudo apt-get update
-      sudo apt-get install maven3
-      sudo ln -s /usr/bin/mvn3 /usr/bin/mvn
- ```
- *   On Ubuntu 15.10
- ```
-      sudo apt-get update
-      sudo apt-get install maven
- ```
+## Building the plugin ##
 
-*  Build
+Requires JDK 11+ and Maven 3+:
 
-   When in the root directory, where *pom.xml* resides:
 ```
-     mvn package
+mvn package
 ```
-   Note: the first time this command is invoked, many downloads will occur and it will take quite some time.
+
+The plugin HPI is produced at `target/aqua-security-scanner.hpi`.
+
+## Local Development with Docker ##
+
+A Docker-based test environment is provided in `test/jenkins-docker/`:
+
+```bash
+# Create a .env file with your Aqua credentials (see .env.example)
+cp test/jenkins-docker/.env.example test/jenkins-docker/.env
+# Edit .env with your values
+
+# Build and start Jenkins with the plugin pre-installed
+cd test/jenkins-docker
+docker compose up --build -d
+```
+
+Jenkins will be available at http://localhost:8080 (admin/admin). The plugin is built inside Docker (no local Maven/JDK needed) and configured via CasC from `jenkins.yaml`.
 
 ## Installing manually ##
-Copy the *target/aqua-docker-scanner.hpi* file to *$JENKINS/plugins/* where *JENKINS* is the Jenkins root directory, by default it is */var/lib/jenkins/*.
 
-Restart Jenkins:
-```
-     sudo /etc/init.d/jenkins restart
-```
+Copy `target/aqua-security-scanner.hpi` to `$JENKINS_HOME/plugins/` and restart Jenkins.
 
-## Publicly releasing a new version to jenkins-ci.org ##
-See https://wiki.jenkins-ci.org/display/JENKINS/Hosting+Plugins#HostingPlugins-Releasingtojenkinsci.org. It describes several alternatives, use the following:
+## Releasing ##
 
-1. If not already done, create a *settings.xml* file with your credentials as described
-2. Execute and accept defaults for prompts :
+See [Hosting Plugins](https://www.jenkins.io/doc/developer/publishing/releasing/). Execute:
 ```
-    mvn release:prepare release:perform
-````
+mvn release:prepare release:perform
+```

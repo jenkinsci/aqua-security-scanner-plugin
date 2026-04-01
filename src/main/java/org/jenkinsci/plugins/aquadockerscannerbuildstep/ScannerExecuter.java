@@ -92,8 +92,7 @@ public class ScannerExecuter {
 			// If scan is of dockerarchive with podman, we don't support it.
 			ImageLocation location = ImageLocation.valueOf(locationType.toUpperCase());
 			if(Objects.equals(location, ImageLocation.DOCKERARCHIVE) && !isDocker) {
-				listener.getLogger().println("Podman is not supported with docker-archive");
-				System.exit(1);
+				throw new AbortException("Podman is not supported with docker-archive");
 			}				
 
 			switch (location) {
@@ -257,6 +256,7 @@ public class ScannerExecuter {
 		if (htmlStart == -1)
 		{
 			listener.getLogger().println(scanOutput);
+			return;
 		}
 		listener.getLogger().println(scanOutput.substring(0,htmlStart));
 		int htmlEnd = scanOutput.lastIndexOf("</html>") + 7;

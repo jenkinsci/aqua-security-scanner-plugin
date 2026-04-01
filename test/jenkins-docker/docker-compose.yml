@@ -1,0 +1,21 @@
+services:
+  jenkins:
+    build:
+      context: ../..
+      dockerfile: test/jenkins-docker/Dockerfile
+    container_name: aqua-plugin-test
+    ports:
+      - "8080:8080"
+      - "50000:50000"
+    volumes:
+      - jenkins_home:/var/jenkins_home
+      # Mount Docker socket so the plugin can run scanner containers
+      - /var/run/docker.sock:/var/run/docker.sock
+    env_file:
+      - .env
+    environment:
+      - JENKINS_ADMIN_ID=admin
+      - JENKINS_ADMIN_PASSWORD=admin
+
+volumes:
+  jenkins_home:

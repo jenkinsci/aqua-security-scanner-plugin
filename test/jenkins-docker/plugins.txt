@@ -1,0 +1,24 @@
+# Core workflow plugins needed by Aqua plugin
+workflow-step-api
+workflow-cps
+workflow-job
+workflow-basic-steps
+workflow-durable-task-step
+workflow-api
+workflow-support
+workflow-aggregator
+script-security
+scm-api
+structs
+
+# Configuration as Code - for testing CasC support
+configuration-as-code
+
+# Credentials plugin - needed for proper credential management
+credentials
+credentials-binding
+plain-credentials
+
+# Pipeline utilities
+pipeline-stage-step
+pipeline-model-definition

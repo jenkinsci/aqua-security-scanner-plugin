@@ -1,0 +1,7 @@
+unclassified:
+  aqua:
+    aquaScannerImage: "registry.example.com/aquasec/scanner:latest"
+    apiURL: "https://aqua.example.com"
+    user: "myuser"
+    password: "mypassword"
+    timeout: 300

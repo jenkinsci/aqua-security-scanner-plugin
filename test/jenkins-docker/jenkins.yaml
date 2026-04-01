@@ -1,0 +1,25 @@
+jenkins:
+  securityRealm:
+    local:
+      allowsSignup: false
+      users:
+        - id: "admin"
+          password: "admin"
+  authorizationStrategy:
+    loggedInUsersCanDoAnything:
+      allowAnonymousRead: false
+
+unclassified:
+  location:
+    url: "http://localhost:8080/"
+  aqua:
+    aquaScannerImage: "registry.aquasec.com/scanner:2022.4"
+    apiURL: "${AQUA_API_URL}"
+    # Leave user empty to use password as a token
+    user: "${AQUA_USER}"
+    password: "${AQUA_PASSWORD}"
+    timeout: 300
+    runOptions: "--net=host"
+    caCertificates: false
+    registryUsername: "${AQUA_REGISTRY_USERNAME}"
+    registryPassword: "${AQUA_REGISTRY_PASSWORD}"

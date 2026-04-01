@@ -1,0 +1,13 @@
+unclassified:
+  aqua:
+    aquaScannerImage: "registry.example.com/aquasec/scanner:latest"
+    apiURL: "https://aqua.example.com"
+    # Leave user empty to use password as a token
+    user: ""
+    password: "test-token-123"
+    timeout: 600
+    runOptions: "--net=host"
+    caCertificates: true
+    registryAuthType: "pipelineAuth"
+    registryUsername: "reg-user"
+    registryPassword: "reg-pass"
