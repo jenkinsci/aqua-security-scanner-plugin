@@ -33,7 +33,7 @@ public class ScannerExecuter {
 			String aquaScannerImage, String apiURL, String user, Secret password, Secret token, int timeout,
 			String runOptions, String locationType, String localImage, String registry, boolean register, String hostedImage,
 			boolean hideBase, boolean showNegligible, boolean checkonly, String notCompliesCmd, boolean caCertificates,
-			String policies, Secret localToken, String customFlags, String tarFilePath, String containerRuntime, String scannerPath, String runtimeDirectory) {
+			String policies, Secret localToken, String customFlags, String tarFilePath, String containerRuntime, String scannerPath, String runtimeDirectory) throws AbortException {
 
 		PrintStream print_stream = null;
 		try {
@@ -236,6 +236,8 @@ public class ScannerExecuter {
 
 			return exitCode;
 
+		} catch (AbortException e) {
+			throw e;
 		} catch (RuntimeException e) {
 			listener.getLogger().println("RuntimeException:" + e.toString());
 			return -1;
