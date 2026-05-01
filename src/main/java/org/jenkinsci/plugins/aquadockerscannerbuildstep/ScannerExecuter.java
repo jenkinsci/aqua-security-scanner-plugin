@@ -261,7 +261,12 @@ public class ScannerExecuter {
 			return;
 		}
 		listener.getLogger().println(scanOutput.substring(0,htmlStart));
-		int htmlEnd = scanOutput.lastIndexOf("</html>") + 7;
+		int htmlEndIdx = scanOutput.lastIndexOf("</html>");
+		if (htmlEndIdx == -1) {
+			listener.getLogger().println(scanOutput.substring(htmlStart));
+			return;
+		}
+		int htmlEnd = htmlEndIdx + 7;
 
 		if (htmlEnd+1 < scanOutput.length()){
 			listener.getLogger().println(scanOutput.substring(htmlEnd+1, scanOutput.length()));

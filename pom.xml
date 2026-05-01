@@ -115,7 +115,7 @@
     <connection>scm:git:git://github.com/jenkinsci/${project.artifactId}-plugin.git</connection>
     <developerConnection>scm:git:git@github.com:jenkinsci/${project.artifactId}-plugin.git</developerConnection>
     <url>http://github.com/jenkinsci/${project.artifactId}-plugin</url>
-    <tag>aqua-security-scanner-3.2.9-SNAPSHOT</tag>
+    <tag>HEAD</tag>
   </scm>
 
   <build>
