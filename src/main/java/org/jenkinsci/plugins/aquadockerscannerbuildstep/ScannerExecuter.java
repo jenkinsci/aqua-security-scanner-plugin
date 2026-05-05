@@ -33,7 +33,7 @@ public class ScannerExecuter {
 			String aquaScannerImage, String apiURL, String user, Secret password, Secret token, int timeout,
 			String runOptions, String locationType, String localImage, String registry, boolean register, String hostedImage,
 			boolean hideBase, boolean showNegligible, boolean checkonly, String notCompliesCmd, boolean caCertificates,
-			String policies, Secret localToken, String customFlags, String tarFilePath, String containerRuntime, String scannerPath, String runtimeDirectory) {
+			String policies, Secret localToken, String customFlags, String tarFilePath, String containerRuntime, String scannerPath, String runtimeDirectory) throws AbortException {
 
 		PrintStream print_stream = null;
 		try {
@@ -92,8 +92,7 @@ public class ScannerExecuter {
 			// If scan is of dockerarchive with podman, we don't support it.
 			ImageLocation location = ImageLocation.valueOf(locationType.toUpperCase());
 			if(Objects.equals(location, ImageLocation.DOCKERARCHIVE) && !isDocker) {
-				listener.getLogger().println("Podman is not supported with docker-archive");
-				System.exit(1);
+				throw new AbortException("Podman is not supported with docker-archive");
 			}				
 
 			switch (location) {
@@ -237,6 +236,8 @@ public class ScannerExecuter {
 
 			return exitCode;
 
+		} catch (AbortException e) {
+			throw e;
 		} catch (RuntimeException e) {
 			listener.getLogger().println("RuntimeException:" + e.toString());
 			return -1;
@@ -257,9 +258,15 @@ public class ScannerExecuter {
 		if (htmlStart == -1)
 		{
 			listener.getLogger().println(scanOutput);
+			return;
 		}
 		listener.getLogger().println(scanOutput.substring(0,htmlStart));
-		int htmlEnd = scanOutput.lastIndexOf("</html>") + 7;
+		int htmlEndIdx = scanOutput.lastIndexOf("</html>");
+		if (htmlEndIdx == -1) {
+			listener.getLogger().println(scanOutput.substring(htmlStart));
+			return;
+		}
+		int htmlEnd = htmlEndIdx + 7;
 
 		if (htmlEnd+1 < scanOutput.length()){
 			listener.getLogger().println(scanOutput.substring(htmlEnd+1, scanOutput.length()));

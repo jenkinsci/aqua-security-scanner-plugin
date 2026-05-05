@@ -3,7 +3,6 @@ package org.jenkinsci.plugins.aquadockerscannerbuildstep;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import hudson.*;
 import hudson.util.FormValidation;
-import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.tasks.Builder;
 //import hudson.model.BuildListener;
@@ -251,12 +250,20 @@ public class AquaDockerScannerBuilder extends Builder implements SimpleBuildStep
 		Secret token = getDescriptor().getToken();
 		String registryAuthType = getDescriptor().getRegistryAuthType();
 
+		// CasC simplification: if user is empty and password is set, treat password as token
+		if ((user == null || user.trim().isEmpty())
+				&& password != null && !Secret.toString(password).trim().isEmpty()
+				&& (token == null || Secret.toString(token).trim().isEmpty())) {
+			token = password;
+			password = Secret.fromString("");
+		}
+
 		// If user and password is empty, check if token is provided as global or local value
-		if(("").equals(user) && Secret.toString(password).equals("") && 
+		if(("").equals(user) && Secret.toString(password).equals("") &&
 			Secret.toString(token).equals("") && Secret.toString(localToken).equals("")){
 				throw new AbortException("Either Username/Password or Token should be provided in Global Settings, or"+
 				" valid token provided with in Token field in the build configuration");
-			
+
 		}
 
 		int timeout = getDescriptor().getTimeout();
@@ -299,8 +306,12 @@ public class AquaDockerScannerBuilder extends Builder implements SimpleBuildStep
 			default:
 				displayImageName = "";	
 		}
+		// Registry login: triggered by registryAuthType="pipelineAuth" (web UI),
+		// or automatically when registryUsername is set (CasC)
+		boolean hasRegistryCreds = registryUsername != null && !registryUsername.trim().isEmpty();
+		boolean registryLoginRequired = (registryAuthType != null && registryAuthType.equals("pipelineAuth")) || hasRegistryCreds;
 		if (
-				registryAuthType != null && registryAuthType.equals("pipelineAuth")
+				registryLoginRequired
 				&& (containerRuntime == null || containerRuntime.isEmpty() || containerRuntime.equals("docker") || containerRuntime.equals("podman"))
 		) {
 			boolean loginSuccess = new AquaScannerRegistryLogin(launcher, listener)
@@ -526,6 +537,88 @@ public class AquaDockerScannerBuilder extends Builder implements SimpleBuildStep
 
 		public boolean getCaCertificates() {
 			return caCertificates;
+		}
+
+		// CasC setters — these enable Configuration as Code (JCasC) support.
+		// The configure() method above handles the web UI form; these setters
+		// are discovered by CasC via reflection.
+
+		@DataBoundSetter
+		public void setAquaScannerImage(String aquaScannerImage) {
+			this.aquaScannerImage = aquaScannerImage;
+			save();
+		}
+
+		@DataBoundSetter
+		public void setApiURL(String apiURL) {
+			this.apiURL = Secret.fromString(apiURL);
+			save();
+		}
+
+		@DataBoundSetter
+		public void setUser(String user) {
+			this.user = Secret.fromString(user);
+			save();
+		}
+
+		/**
+		 * Sets the password for Aqua API authentication.
+		 * In CasC, leave user empty to use password as a token.
+		 * The token/password routing happens at build time in
+		 * {@link AquaDockerScannerBuilder#perform}.
+		 */
+		@DataBoundSetter
+		public void setPassword(String password) {
+			this.password = Secret.fromString(password);
+			save();
+		}
+
+		@DataBoundSetter
+		public void setToken(String token) {
+			this.token = Secret.fromString(token);
+			save();
+		}
+
+		@DataBoundSetter
+		public void setRegistryUsername(String registryUsername) {
+			this.registryUsername = Secret.fromString(registryUsername);
+			save();
+		}
+
+		@DataBoundSetter
+		public void setRegistryPassword(String registryPassword) {
+			this.registryPassword = Secret.fromString(registryPassword);
+			save();
+		}
+
+		@DataBoundSetter
+		public void setRegistryAuthType(String registryAuthType) {
+			this.registryAuthType = registryAuthType;
+			save();
+		}
+
+		@DataBoundSetter
+		public void setAuthVal(String authval) {
+			this.authval = authval;
+			save();
+		}
+
+		@DataBoundSetter
+		public void setTimeout(int timeout) {
+			this.timeout = timeout;
+			save();
+		}
+
+		@DataBoundSetter
+		public void setRunOptions(String runOptions) {
+			this.runOptions = runOptions;
+			save();
+		}
+
+		@DataBoundSetter
+		public void setCaCertificates(boolean caCertificates) {
+			this.caCertificates = caCertificates;
+			save();
 		}
 	}
 }
