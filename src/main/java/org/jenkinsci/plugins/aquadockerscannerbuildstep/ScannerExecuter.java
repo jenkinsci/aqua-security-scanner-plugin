@@ -111,7 +111,7 @@ public class ScannerExecuter {
 					args.add("-v", scannerPath+":/aquasec/scannercli:Z", "--entrypoint=/aquasec/scannercli");
 				}
 
-				if(!isDocker && runtimeDirectory.isEmpty()) {
+				if (isDocker || (!isDocker && runtimeDirectory.isEmpty())) {
 					args.addTokenized(runOptions);
 				}
 
